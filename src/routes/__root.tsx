@@ -7,6 +7,8 @@ import {
   Scripts,
 } from "@tanstack/react-router";
 
+import appCss from "~/styles/app.css?url";
+
 export const Route = createRootRoute({
   head: () => ({
     meta: [
@@ -19,6 +21,12 @@ export const Route = createRootRoute({
       },
       {
         title: "ATGeo Marker",
+      },
+    ],
+    links: [
+      {
+        rel: "stylesheet",
+        href: appCss,
       },
     ],
   }),
