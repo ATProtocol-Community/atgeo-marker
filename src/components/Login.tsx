@@ -68,7 +68,7 @@ export function Login() {
       >
         <Input
           type="text"
-          placeholder="goosetopher.bsky.social"
+          placeholder="gustophergoose.bsky.social"
           name="handle"
         />
         <Button>Login with ATproto</Button>
