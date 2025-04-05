@@ -12,14 +12,8 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "~/components/ui/alert-dialog";
-import {
-  getCookie,
-  getEvent,
-  setCookie,
-  useSession,
-} from "@tanstack/react-start/server";
-import { Login } from "~/components/Login";
-import { getLoggedInBskyAgent } from "~/lib/auth";
+import { getCookie, setCookie } from "@tanstack/react-start/server";
+import { getUser, Login } from "~/components/Login";
 
 const getCount = createServerFn({
   method: "GET",
@@ -36,34 +30,6 @@ const updateCount = createServerFn({ method: "POST" })
 
     return newCount;
   });
-
-const getUser = createServerFn({ method: "GET" }).handler(async () => {
-  const event = getEvent();
-  const session = await useSession(event, {
-    password: "i too am a friend of goosetopher",
-  });
-  if (!session.data.did) {
-    return undefined;
-  }
-  const agent = await getLoggedInBskyAgent({
-    did: session.data.did,
-  });
-  if (!agent) {
-    return undefined;
-  }
-  const user = await agent.getProfile({
-    actor: session.data.did,
-  });
-
-  return user.success
-    ? {
-        handle: user.data.handle,
-        did: user.data.did,
-        displayName: user.data.displayName,
-        avatar: user.data.avatar,
-      }
-    : undefined;
-});
 
 export const Route = createFileRoute("/")({
   component: Home,

@@ -2,6 +2,36 @@ import { createServerFn } from "@tanstack/react-start";
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
 import { getLoggedInBskyAgent, loginToBsky } from "~/lib/auth";
+import { useSession } from "@tanstack/react-start/server";
+import { getEvent } from "@tanstack/react-start/server";
+
+export const getUser = createServerFn({ method: "GET" }).handler(async () => {
+  const event = getEvent();
+  const session = await useSession(event, {
+    password: "i too am a friend of goosetopher",
+  });
+  if (!session.data.did) {
+    return undefined;
+  }
+  const agent = await getLoggedInBskyAgent({
+    did: session.data.did,
+  });
+  if (!agent) {
+    return undefined;
+  }
+  const user = await agent.getProfile({
+    actor: session.data.did,
+  });
+
+  return user.success
+    ? {
+        handle: user.data.handle,
+        did: user.data.did,
+        displayName: user.data.displayName,
+        avatar: user.data.avatar,
+      }
+    : undefined;
+});
 
 const loginUser = createServerFn({ method: "POST" })
   .validator((formData: unknown) => {

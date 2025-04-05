@@ -12,9 +12,20 @@ Experiments](https://wiki.atprotocol.community/en/working-groups/atgeo/experimen
 ## How to Run
 
 > [!WARNING]
-> OAuth login will only run in localhost and will persist challenges
-> and sessions to disk. Must be heavily updated for real production use.
+>
+> OAuth login will only run in localhost and will persist challenges and
+> sessions to disk. Must be heavily updated for real production use.
 
 0. Run `npm install`
 1. Run `npm run dev`
 2. Go to `http://localhost/`
+
+## Where to Go
+
+- Main entrypoint is at [`src/routes/index.tsx`](./src/routes/index.tsx)
+- Everything related to OAuth is in [`src/lib/auth.ts`](./src/lib/auth.ts)
+  (stolen from simple local-only setup I had written previously)
+- Login component is in [src/components/Login.tsx](./src/components/Login.tsx).
+  There's no real validation logic.
+- To log out, delete the `.tokens/` folder. And feel free to implement a real
+  auth flow!
