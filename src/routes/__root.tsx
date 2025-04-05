@@ -7,6 +7,9 @@ import {
   Scripts,
 } from "@tanstack/react-router";
 import appCss from "~/styles/app.css?url";
+import Header from "~/components/Header";
+import { ThemeProvider } from "~/lib/ThemeProvider";
+import { Meta } from "@tanstack/react-start";
 
 export const Route = createRootRoute({
   head: () => ({
@@ -40,14 +43,17 @@ function RootComponent() {
   );
 }
 
-function RootDocument({ children }: Readonly<{ children: ReactNode }>) {
+function RootDocument({ children }: React.PropsWithChildren) {
   return (
-    <html>
+    <html lang="en" suppressHydrationWarning>
       <head>
         <HeadContent />
       </head>
       <body>
-        {children}
+        <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
+          <Header />
+          {children}
+        </ThemeProvider>
         <Scripts />
       </body>
     </html>

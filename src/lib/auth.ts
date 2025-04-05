@@ -22,7 +22,7 @@ const getSessionPath = ({ did }: { did: string }) =>
 class StateStore implements NodeSavedStateStore {
   async get(key: string): Promise<NodeSavedState | undefined> {
     return JSON.parse(
-      await readFile(getChallengePath({ key }), "utf-8")
+      await readFile(getChallengePath({ key }), "utf-8"),
     ) as NodeSavedState;
   }
   async set(key: string, val: NodeSavedState) {
@@ -41,7 +41,7 @@ class SessionStore implements NodeSavedSessionStore {
   async get(key: string): Promise<NodeSavedSession | undefined> {
     try {
       return JSON.parse(
-        await readFile(getSessionPath({ did: key }), "utf-8")
+        await readFile(getSessionPath({ did: key }), "utf-8"),
       ) as NodeSavedSession;
     } catch (e) {
       if (e instanceof Error && e.message.includes("ENOENT")) {
@@ -109,7 +109,7 @@ const createClient = async () => {
 export const oauthClient = await createClient();
 
 export const getLoggedInBskyAgent = async (
-  user: { handle: string } | { did: string }
+  user: { handle: string } | { did: string },
 ) => {
   const agent = new Agent("https://public.api.bsky.app");
   const did =
@@ -149,4 +149,8 @@ export async function loginToBsky({ user }: { user: string }) {
   });
 
   return url.href;
+}
+
+export async function logoutFromBsky({ did }: { did: string }) {
+  await oauthClient.revoke(did);
 }
