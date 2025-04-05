@@ -1,4 +1,4 @@
-import { createFileRoute, useRouter } from "@tanstack/react-router";
+import { createFileRoute, Navigate, useRouter } from "@tanstack/react-router";
 import { createServerFn } from "@tanstack/react-start";
 
 import {
@@ -50,7 +50,8 @@ function Home() {
   const router = useRouter();
 
   if (state === undefined) {
-    return <Login />;
+    // redirect to /auth/login
+    return <Navigate to="/auth/login" />;
   }
 
   return (
