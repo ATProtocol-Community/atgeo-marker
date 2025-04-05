@@ -11,7 +11,8 @@ Experiments](https://wiki.atprotocol.community/en/working-groups/atgeo/experimen
 
 ## How to Run
 
-> [!WARNING] OAuth login will only run in localhost and will persist challenges
+> [!WARNING]
+> OAuth login will only run in localhost and will persist challenges
 > and sessions to disk. Must be heavily updated for real production use.
 
 0. Run `npm install`
