@@ -39,7 +39,6 @@ export function Login() {
         <Input
           type="text"
           placeholder="goosetopher.bsky.social"
-          defaultValue={"essentialrandom.bsky.social"}
           name="handle"
         />
         <Button>Login with ATproto</Button>
