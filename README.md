@@ -12,14 +12,23 @@ Experiments](https://wiki.atprotocol.community/en/working-groups/atgeo/experimen
 
 ## How to Run
 
+You'll need [pnpm](https://pnpm.io/) installed.
+If you don't have node installed, you can install it with pnpm.
+
+```
+# to add node everywhere, add the --global flag to the commands below
+pnpm env latest
+pnpm env use latest
+```
+
 > [!WARNING]
 >
 > OAuth login will only run in localhost and will persist challenges and
 > sessions to disk. Must be heavily updated for real production use.
 
-0. Run `npm install`
-1. Run `npm run dev`
-2. Go to `http://localhost/`
+0. Run `pnpm install`
+1. Run `pnpm dev`
+2. Go to `http://127.0.0.1/`
 
 ## Where to Go
 
