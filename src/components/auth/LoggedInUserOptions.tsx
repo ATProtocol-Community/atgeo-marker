@@ -28,7 +28,7 @@ export function LoggedInUserOptions({ user }: { user: User }) {
           {user.displayName || user.handle || user.did}
         </div>
       </DropdownMenuTrigger>
-      <DropdownMenuContent>
+      <DropdownMenuContent align="end">
         <DropdownMenuLabel>My Account</DropdownMenuLabel>
         <DropdownMenuSeparator />
         <DropdownMenuItem>
