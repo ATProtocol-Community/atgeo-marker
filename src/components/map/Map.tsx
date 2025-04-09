@@ -16,7 +16,7 @@ interface MapProps {
   animateIn?: boolean;
 }
 
-export default function Map({ animateIn = false }: MapProps) {
+export default function Map({ animateIn = true }: MapProps) {
   const [viewState, setViewState] = useState<ViewState>({
     latitude: 47.620422,
     longitude: -122.349358,
@@ -27,27 +27,32 @@ export default function Map({ animateIn = false }: MapProps) {
     padding: { bottom: 0, top: 128, left: 0, right: 0 },
   });
 
-  // current animation frame
-  const animationFrameRef = useRef<number | null>(null);
-  // last frame's timestamp
-  const previousTimeRef = useRef<number | null>(null);
-  const frameCount = useRef<number>(1);
-
   const isAnimating = useRef(animateIn);
 
   useEffect(() => {
+    // current animation frame
+    let animationFrameRef: number | null = null;
+    // last frame's timestamp
+    let previousTimeRef: number | null = null;
+    let frameCount = 1;
     const animateBearing = (currentTime: number) => {
       if (!isAnimating.current) return;
-      if (previousTimeRef.current === null) {
-        previousTimeRef.current = currentTime;
+      if (previousTimeRef === null) {
+        previousTimeRef = currentTime;
       }
 
       // calculate deltaTime (change in time since last frame)
-      const deltaTime = currentTime - previousTimeRef.current;
+      const deltaTime = currentTime - previousTimeRef;
       const degreesPerSecond = Math.min(
         5,
-        Math.max((frameCount.current / 500) ** -1.0 - 1, 0),
+        Math.max((frameCount / 500) ** -1.0 - 1, 0),
       );
+
+      // intro anim is finished, no need for more processing
+      if (degreesPerSecond === 0) {
+        isAnimating.current = false;
+        return;
+      }
 
       setViewState((prevState) => ({
         ...prevState,
@@ -57,18 +62,19 @@ export default function Map({ animateIn = false }: MapProps) {
       }));
 
       // set time info for next frame
-      previousTimeRef.current = currentTime;
-      animationFrameRef.current = requestAnimationFrame(animateBearing);
-      frameCount.current += 1;
+      previousTimeRef = currentTime;
+      animationFrameRef = requestAnimationFrame(animateBearing);
+      frameCount += 1;
     };
 
-    animationFrameRef.current = requestAnimationFrame(animateBearing);
+    console.log("Starting anim");
+    animationFrameRef = requestAnimationFrame(animateBearing);
 
     return () => {
-      if (animationFrameRef.current !== null) {
-        cancelAnimationFrame(animationFrameRef.current);
+      if (animationFrameRef !== null) {
+        cancelAnimationFrame(animationFrameRef);
       }
-      previousTimeRef.current = null;
+      previousTimeRef = null;
     };
   }, []);
 
