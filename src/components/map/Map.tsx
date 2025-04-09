@@ -12,14 +12,19 @@ import {
 } from "react-map-gl/maplibre";
 import "maplibre-gl/dist/maplibre-gl.css";
 
-export default function Map() {
+interface MapProps {
+  animateIn?: boolean;
+}
+
+export default function Map({ animateIn = false }: MapProps) {
   const [viewState, setViewState] = useState<ViewState>({
     latitude: 47.620422,
     longitude: -122.349358,
     zoom: 16,
     bearing: 0,
     pitch: 60,
-    padding: { bottom: 0, top: 0, left: 0, right: 0 },
+    // keeping into account the header
+    padding: { bottom: 0, top: 128, left: 0, right: 0 },
   });
 
   // current animation frame
@@ -28,7 +33,7 @@ export default function Map() {
   const previousTimeRef = useRef<number | null>(null);
   const frameCount = useRef<number>(1);
 
-  const isAnimating = useRef(true);
+  const isAnimating = useRef(animateIn);
 
   useEffect(() => {
     const animateBearing = (currentTime: number) => {
