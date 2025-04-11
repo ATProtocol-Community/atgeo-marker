@@ -5,6 +5,7 @@
   "main": "index.js",
   "type": "module",
   "scripts": {
+    "lexicon:generate": "pnpx @atproto/lex-cli gen-api ./generated/api ./lexicons/**/*.json",
     "dev": "vinxi dev --port 80 --host",
     "build": "vinxi build",
     "start": "vinxi start"
