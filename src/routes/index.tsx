@@ -14,6 +14,8 @@ import {
 } from "~/components/ui/alert-dialog";
 import { setCookie } from "@tanstack/react-start/server";
 import { getCookie } from "@tanstack/react-start/server";
+import { useState } from "react";
+import { MarkerForm } from "~/components/MarkerForm";
 
 const getCount = createServerFn({
   method: "GET",
@@ -43,7 +45,8 @@ export const Route = createFileRoute("/")({
 function Home() {
   const { user } = Route.useRouteContext();
   const state = Route.useLoaderData();
-  const router = useRouter();
+  const [markers, setMarkers] = useState<string[]>([]);
+  const [alertOpen, setAlertOpen] = useState(false);
 
   if (!user) {
     // redirect to /auth/login
@@ -54,7 +57,14 @@ function Home() {
     <main className="flex h-screen flex-col items-center justify-center">
       <div>Hello {user.handle}</div>
       <div>You have made {state.count} markers</div>
-      <AlertDialog>
+      <div>Hello {user.handle}</div>
+      <div>You have made these markers:</div>
+      {markers.map((marker) => (
+        <div key={marker}>
+          <a href={`https://pdsls.dev/${marker}`}>{marker}</a>
+        </div>
+      ))}
+      <AlertDialog open={alertOpen} onOpenChange={setAlertOpen}>
         <AlertDialogTrigger className="bg-primary text-primary-foreground rounded-md px-4 py-2">
           Make a Marker
         </AlertDialogTrigger>
@@ -67,13 +77,21 @@ function Home() {
               This is still experimental
             </AlertDialogDescription>
           </AlertDialogHeader>
+          <MarkerForm
+            formId="marker-form"
+            onNewMarker={(uri) => {
+              setMarkers([...markers, uri]);
+              setAlertOpen(false);
+            }}
+          />
           <AlertDialogFooter>
             <AlertDialogCancel>Cancel</AlertDialogCancel>
             <AlertDialogAction
-              onClick={async () => {
-                updateCount({ data: 1 }).then(() => {
-                  router.invalidate();
-                });
+              onClick={async (e) => {
+                e.preventDefault();
+                document
+                  .querySelector<HTMLFormElement>("#marker-form")
+                  ?.submit();
               }}
             >
               Marker time!!

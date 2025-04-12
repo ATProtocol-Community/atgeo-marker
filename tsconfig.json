@@ -15,7 +15,9 @@
     "forceConsistentCasingInFileNames": true,
     "baseUrl": ".",
     "paths": {
-      "~/*": ["./src/*"]
+      "~/*": ["./src/*"],
+      "~/lexicons/*": ["./lexicons/*"],
+      "~/generated/*": ["./generated/*"]
     },
     "noEmit": true
   }

@@ -4,6 +4,7 @@ import { Agent } from "@atproto/api";
 import { nanoid } from "nanoid";
 import path from "path";
 import { mkdir, unlink, readFile, writeFile, rm } from "fs/promises";
+import { AtpBaseClient as MarkerAgent } from "~/generated/api";
 
 import type {
   NodeOAuthClientOptions,
@@ -108,9 +109,15 @@ const createClient = async () => {
 
 export const oauthClient = await createClient();
 
+let LOGGED_IN_AGENT: Agent | null = null;
 export const getLoggedInBskyAgent = async (
   user: { handle: string } | { did: string }
 ) => {
+  if (LOGGED_IN_AGENT) {
+    // TODO: we should check if the agent is still valid
+    return LOGGED_IN_AGENT;
+  }
+
   const agent = new Agent("https://public.api.bsky.app");
   const did =
     "did" in user
@@ -133,6 +140,15 @@ export const getLoggedInBskyAgent = async (
     throw e;
   }
   return null;
+};
+
+export const getLoggedInMarkerAgent = async (user: { handle: string }) => {
+  const agent = await getLoggedInBskyAgent({ handle: user.handle });
+  if (!agent) {
+    return null;
+  }
+  const markerAgent = new MarkerAgent(agent.fetchHandler);
+  return markerAgent;
 };
 
 export async function loginToBsky({ user }: { user: string }) {

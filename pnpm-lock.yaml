@@ -44,6 +44,9 @@ importers:
       geojson:
         specifier: ^0.5.0
         version: 0.5.0
+      lexicon-to-zod:
+        specifier: ^1.0.0
+        version: 1.0.0
       lucide-react:
         specifier: ^0.487.0
         version: 0.487.0(react@19.1.0)
@@ -2557,6 +2560,10 @@ packages:
   lazystream@1.0.1:
     resolution: {integrity: sha512-b94GiNHQNy6JNTrt5w6zNyffMrNkXZb3KTkCZJb2V1xaEGCk093vkZ2jk3tpaeP33/OiXC+WvK9AxUebnf5nbw==}
     engines: {node: '>= 0.6.3'}
+
+  lexicon-to-zod@1.0.0:
+    resolution: {integrity: sha512-Hde2/04PRFI+lKASEwKtxfgB9T36Vt6JgDbyEeQm7OhWNwACdeGMiJm0Zyr9BrALqxYELRFW+km3ZuYoHzUsYg==}
+    engines: {node: 22.x}
 
   lightningcss-darwin-arm64@1.29.2:
     resolution: {integrity: sha512-cK/eMabSViKn/PG8U/a7aCorpeKLMlK0bQeNHmdb7qUnBkNPnL+oV5DjJUo0kqWsJUapZsM4jCfYItbqBDvlcA==}
@@ -6243,6 +6250,10 @@ snapshots:
   lazystream@1.0.1:
     dependencies:
       readable-stream: 2.3.8
+
+  lexicon-to-zod@1.0.0:
+    dependencies:
+      zod: 3.24.2
 
   lightningcss-darwin-arm64@1.29.2:
     optional: true
