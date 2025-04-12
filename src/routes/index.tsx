@@ -89,9 +89,13 @@ function Home() {
             <AlertDialogAction
               onClick={async (e) => {
                 e.preventDefault();
+                // Dispatch a submit event to the form
+                // TODO: remove this once the form is not in the dialog anymore
                 document
                   .querySelector<HTMLFormElement>("#marker-form")
-                  ?.submit();
+                  ?.dispatchEvent(
+                    new Event("submit", { bubbles: true, cancelable: true })
+                  );
               }}
             >
               Marker time!!
