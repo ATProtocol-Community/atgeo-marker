@@ -5,6 +5,15 @@ export default defineConfig({
   tsr: {
     appDirectory: "./src",
   },
+  server: {
+    esbuild: {
+      options: {
+        supported: {
+          "top-level-await": true,
+        },
+      },
+    },
+  },
   vite: {
     plugins: [
       tsConfigPaths({
