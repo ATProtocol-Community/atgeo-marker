@@ -6,25 +6,25 @@ import {
   loginToBsky,
 } from "~/lib/auth";
 import { useFormStatus } from "react-dom";
-// import { lexiconToZod } from "lexicon-to-zod";
+import { lexiconToZod } from "lexicon-to-zod";
 // TODO: swap with the generated lexicon
 import geomarkerLexicon from "~/lexicons/community/atprotocol/geomarker.json" with { type: "json" };
 import { cn } from "~/lib/utils";
 import { getUser } from "./Login";
 import { Button } from "./ui/button";
 
-// const schemaMap = lexiconToZod(geomarkerLexicon);
+const schemaMap = lexiconToZod(geomarkerLexicon);
 
 const postMarker = createServerFn({ method: "POST" })
   .validator((formData: unknown) => {
     if (!(formData instanceof FormData)) {
       throw new Error("Invalid form data");
     }
-    // const parsed = schemaMap.parse({
-    //   label: formData.get("label"),
-    //   location: formData.get("location"),
-    //   markedEntries: formData.get("markedEntries"),
-    // });
+    const parsed = schemaMap.defs.Marker.parse({
+      label: formData.get("label"),
+      location: formData.get("location"),
+      markedEntries: formData.get("markedEntries"),
+    });
     return {
       label: formData.get("label"),
       location: formData.get("location"),

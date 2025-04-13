@@ -3,6 +3,7 @@
 import { LoggedInUserOptions } from "./LoggedInUserOptions";
 import { User } from "~/types/auth";
 import { useRouter } from "@tanstack/react-router";
+
 export default function AuthOptions({ user }: { user: User | null }) {
   const router = useRouter();
 

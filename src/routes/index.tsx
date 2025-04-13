@@ -12,32 +12,18 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "~/components/ui/alert-dialog";
-import { setCookie } from "@tanstack/react-start/server";
-import { getCookie } from "@tanstack/react-start/server";
-import { useState } from "react";
 import { MarkerForm } from "~/components/MarkerForm";
-
-const getCount = createServerFn({
-  method: "GET",
-}).handler(() => {
-  return parseInt(getCookie("marker-count") ?? "0");
-});
-
-const updateCount = createServerFn({ method: "POST" })
-  .validator((d: number) => d)
-  .handler(async ({ data }) => {
-    const count = await getCount();
-    const newCount = count + data;
-    setCookie("marker-count", newCount.toString());
-
-    return newCount;
-  });
+import { useState } from "react";
 
 export const Route = createFileRoute("/")({
   component: Home,
-  loader: async () => {
+  loader: async ({ context }) => {
+    const user = context.user;
+    if (!user) {
+      return undefined;
+    }
     return {
-      count: await getCount(),
+      user,
     };
   },
 });
@@ -55,8 +41,6 @@ function Home() {
 
   return (
     <main className="flex h-screen flex-col items-center justify-center">
-      <div>Hello {user.handle}</div>
-      <div>You have made {state.count} markers</div>
       <div>Hello {user.handle}</div>
       <div>You have made these markers:</div>
       {markers.map((marker) => (

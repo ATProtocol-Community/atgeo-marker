@@ -109,12 +109,12 @@ const createClient = async () => {
 
 export const oauthClient = await createClient();
 
+// TODO: incredible HACK, DO NOT PUT THIS IN PRODUCTION
 let LOGGED_IN_AGENT: Agent | null = null;
 export const getLoggedInBskyAgent = async (
   user: { handle: string } | { did: string }
 ) => {
-  if (LOGGED_IN_AGENT) {
-    // TODO: we should check if the agent is still valid
+  if (LOGGED_IN_AGENT && LOGGED_IN_AGENT.assertAuthenticated()) {
     return LOGGED_IN_AGENT;
   }
 
@@ -133,6 +133,7 @@ export const getLoggedInBskyAgent = async (
       return agent;
     }
   } catch (e) {
+    LOGGED_IN_AGENT = null;
     if (e instanceof TokenRefreshError) {
       // Token refresh failed, so we need to login again
       return null;
@@ -172,4 +173,5 @@ export async function loginToBsky({ user }: { user: string }) {
 
 export async function logoutFromBsky({ did }: { did: string }) {
   await oauthClient.revoke(did);
+  LOGGED_IN_AGENT = null;
 }
