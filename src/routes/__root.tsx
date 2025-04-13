@@ -8,7 +8,7 @@ import {
 import appCss from "~/styles/app.css?url";
 import Header from "~/components/Header";
 import { ThemeProvider } from "~/lib/ThemeProvider";
-import { getUser } from "~/components/Login";
+import { getUser } from "~/components/auth/Login";
 import { User } from "~/types/auth";
 
 export const Route = createRootRouteWithContext<{

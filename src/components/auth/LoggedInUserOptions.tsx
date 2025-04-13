@@ -8,7 +8,7 @@ import {
   DropdownMenuTrigger,
 } from "../ui/dropdown-menu";
 import { Button } from "../ui/button";
-import { logoutUser } from "../Login";
+import { logoutUser } from "./Login";
 import { useRouter } from "@tanstack/react-router";
 
 export function LoggedInUserOptions({ user }: { user: User }) {

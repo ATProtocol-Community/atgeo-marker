@@ -1,6 +1,6 @@
 import { createServerFn } from "@tanstack/react-start";
-import { Button } from "./ui/button";
-import { Input } from "./ui/input";
+import { Button } from "../ui/button";
+import { Input } from "../ui/input";
 import { getLoggedInBskyAgent, loginToBsky, logoutFromBsky } from "~/lib/auth";
 import { useSession } from "@tanstack/react-start/server";
 import { getEvent } from "@tanstack/react-start/server";

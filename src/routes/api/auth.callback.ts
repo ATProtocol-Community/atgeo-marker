@@ -1,5 +1,5 @@
 import { createAPIFileRoute } from "@tanstack/react-start/api";
-import { createNewUserSession } from "~/components/Login";
+import { createNewUserSession } from "~/components/auth/Login";
 import { oauthClient } from "~/lib/auth";
 
 export const APIRoute = createAPIFileRoute("/api/auth/callback")({
