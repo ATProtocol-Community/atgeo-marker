@@ -22,7 +22,7 @@ const getSessionPath = ({ did }: { did: string }) =>
 class StateStore implements NodeSavedStateStore {
   async get(key: string): Promise<NodeSavedState | undefined> {
     return JSON.parse(
-      await readFile(getChallengePath({ key }), "utf-8"),
+      await readFile(getChallengePath({ key }), "utf-8")
     ) as NodeSavedState;
   }
   async set(key: string, val: NodeSavedState) {
@@ -41,7 +41,7 @@ class SessionStore implements NodeSavedSessionStore {
   async get(key: string): Promise<NodeSavedSession | undefined> {
     try {
       return JSON.parse(
-        await readFile(getSessionPath({ did: key }), "utf-8"),
+        await readFile(getSessionPath({ did: key }), "utf-8")
       ) as NodeSavedSession;
     } catch (e) {
       if (e instanceof Error && e.message.includes("ENOENT")) {
@@ -108,9 +108,15 @@ const createClient = async () => {
 
 export const oauthClient = await createClient();
 
+// TODO: incredible HACK, DO NOT PUT THIS IN PRODUCTION
+let LOGGED_IN_AGENT: Agent | null = null;
 export const getLoggedInBskyAgent = async (
-  user: { handle: string } | { did: string },
+  user: { handle: string } | { did: string }
 ) => {
+  if (LOGGED_IN_AGENT && LOGGED_IN_AGENT.assertAuthenticated()) {
+    return LOGGED_IN_AGENT;
+  }
+
   const agent = new Agent("https://public.api.bsky.app");
   const did =
     "did" in user
@@ -120,9 +126,14 @@ export const getLoggedInBskyAgent = async (
   try {
     const session = await oauthClient.restore(did);
     if (session) {
-      return new Agent(session);
+      const agent: Agent = new Agent(session);
+
+      agent.assertAuthenticated();
+      LOGGED_IN_AGENT = agent;
+      return LOGGED_IN_AGENT;
     }
   } catch (e) {
+    LOGGED_IN_AGENT = null;
     if (e instanceof TokenRefreshError) {
       // Token refresh failed, so we need to login again
       return null;
@@ -153,4 +164,5 @@ export async function loginToBsky({ user }: { user: string }) {
 
 export async function logoutFromBsky({ did }: { did: string }) {
   await oauthClient.revoke(did);
+  LOGGED_IN_AGENT = null;
 }

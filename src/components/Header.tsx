@@ -3,6 +3,7 @@ import { Link, useRouterState } from "@tanstack/react-router";
 import { Library, MapPin } from "lucide-react";
 import ThemeToggle from "./ThemeToggle";
 import AuthOptions from "./auth/AuthOptions";
+import { User } from "~/types/auth";
 
 const navItems = [
   {
@@ -27,11 +28,9 @@ const navItems = [
   },
 ];
 
-export default function Header() {
+export default function Header({ user }: { user: User | null }) {
   const { location } = useRouterState();
   let pathname = location.pathname;
-
-  const [hoveredPath, setHoveredPath] = useState(pathname);
 
   return (
     <div className="container max-w-screen w-full sticky top-10 items-center flex justify-center h-0">
@@ -45,8 +44,6 @@ export default function Header() {
                 <div
                   key={item.path}
                   className="flex items-center justify-center"
-                  onMouseOver={() => setHoveredPath(item.path)}
-                  onMouseLeave={() => setHoveredPath(pathname)}
                 >
                   <Link
                     className={`px-4 py-2 rounded-full text-sm lg:text-base relative no-underline duration-300 ease-in hover:text-zinc-800 dark:hover:text-zinc-100 text-zinc-700 dark:text-zinc-400`}
@@ -60,7 +57,7 @@ export default function Header() {
             })}
           </nav>
           <div className="flex gap-2 items-center">
-            <AuthOptions />
+            <AuthOptions user={user} />
             <ThemeToggle className="rounded-full hover:dark:bg-stone-600/50 hover:bg-stone-300/50 mr-1" />
           </div>
         </div>
