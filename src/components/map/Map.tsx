@@ -11,7 +11,7 @@ import {
   MapRef,
   MapLayerMouseEvent,
 } from "react-map-gl/maplibre";
-// Import specific layer types for better type checking
+
 import type {
   GeoJSONSource,
   CircleLayerSpecification,
@@ -21,9 +21,6 @@ import "maplibre-gl/dist/maplibre-gl.css";
 
 import STOPS from "../../../king_county_transit.json";
 
-// --- Layer Definitions ---
-
-// Cluster Circles Layer
 export const clusterLayer: CircleLayerSpecification = {
   id: "clusters",
   type: "circle",
@@ -45,7 +42,6 @@ export const clusterLayer: CircleLayerSpecification = {
   },
 };
 
-// Cluster Count Layer
 const clusterCountLayer: SymbolLayerSpecification = {
   id: "cluster-count",
   type: "symbol",
@@ -59,11 +55,10 @@ const clusterCountLayer: SymbolLayerSpecification = {
     "text-ignore-placement": true,
   },
   paint: {
-    "text-color": "#000000", // Black text
+    "text-color": "#000000",
   },
 };
 
-// Unclustered Points Layer (Keep definition but comment out usage below)
 const unclusteredPointLayer: CircleLayerSpecification = {
   id: "unclustered-point",
   type: "circle",
@@ -76,8 +71,6 @@ const unclusteredPointLayer: CircleLayerSpecification = {
     "circle-stroke-color": "#fff",
   },
 };
-
-// --- Component ---
 
 interface MapProps {
   animateIn?: boolean;
@@ -98,7 +91,6 @@ export default function Map({ animateIn = true }: MapProps) {
 
   // TODO: find the lib this comes from
   const stopsGeoJson = useMemo((): any => {
-    // (GeoJSON conversion logic remains the same)
     return {
       type: "FeatureCollection",
       features: STOPS.map((stop) => ({
@@ -113,7 +105,6 @@ export default function Map({ animateIn = true }: MapProps) {
   }, []);
 
   const onMapLoad = useCallback(() => {
-    // (Animation logic remains the same)
     if (animateIn && mapRef.current) {
       isAnimating.current = true;
       mapRef.current.flyTo({
@@ -131,7 +122,6 @@ export default function Map({ animateIn = true }: MapProps) {
   }, [animateIn, viewState.longitude, viewState.latitude]);
 
   const onClick = useCallback((event: MapLayerMouseEvent) => {
-    // (Click logic remains the same, only checks cluster layer)
     const map = mapRef.current;
     if (!map || event.defaultPrevented) return;
 
