@@ -20,6 +20,7 @@ import type {
 import "maplibre-gl/dist/maplibre-gl.css";
 
 import STOPS from "../../../king_county_transit.json";
+import { useTheme } from "~/lib/ThemeProvider";
 
 export const clusterLayer: CircleLayerSpecification = {
   id: "clusters",
@@ -89,6 +90,8 @@ export default function Map({ animateIn = true }: MapProps) {
   const isAnimating = useRef(animateIn);
   const mapRef = useRef<MapRef | null>(null);
 
+  const theme = useTheme();
+
   // TODO: find the lib this comes from
   const stopsGeoJson = useMemo((): any => {
     return {
@@ -157,6 +160,12 @@ export default function Map({ animateIn = true }: MapProps) {
 
   const interactiveLayerIds = useMemo(() => [clusterLayer.id], []);
 
+  const mapStyle = useMemo(() => {
+    return theme.theme === "dark"
+      ? "https://gist.githubusercontent.com/espeon/de168da3748c9462e1186203c78221a3/raw/8b1e888003839c2c4dbbd14de3213f31f1ea0643/darkmode.json"
+      : "https://tiles.openfreemap.org/styles/liberty";
+  }, [theme.theme]);
+
   return (
     <MapLibreMap
       ref={mapRef}
@@ -169,7 +178,7 @@ export default function Map({ animateIn = true }: MapProps) {
         setViewState(evt.viewState);
       }}
       onLoad={onMapLoad}
-      mapStyle="https://tiles.openfreemap.org/styles/liberty"
+      mapStyle={mapStyle}
       interactiveLayerIds={interactiveLayerIds}
       onClick={onClick}
     >
