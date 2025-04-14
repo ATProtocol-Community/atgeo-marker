@@ -12,8 +12,8 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "~/components/ui/alert-dialog";
-import { getCookie, setCookie } from "@tanstack/react-start/server";
-import { getUser, Login } from "~/components/Login";
+import { setCookie } from "@tanstack/react-start/server";
+import { getCookie } from "@tanstack/react-start/server";
 
 const getCount = createServerFn({
   method: "GET",
@@ -34,29 +34,25 @@ const updateCount = createServerFn({ method: "POST" })
 export const Route = createFileRoute("/")({
   component: Home,
   loader: async () => {
-    const user = await getUser();
-    if (!user) {
-      return undefined;
-    }
     return {
-      user,
       count: await getCount(),
     };
   },
 });
 
 function Home() {
+  const { user } = Route.useRouteContext();
   const state = Route.useLoaderData();
   const router = useRouter();
 
-  if (state === undefined) {
+  if (!user) {
     // redirect to /auth/login
-    return <Navigate to="/auth/login" />;
+    return <Navigate to="/auth/login" reloadDocument />;
   }
 
   return (
     <main className="flex h-screen flex-col items-center justify-center">
-      <div>Hello {state.user.handle}</div>
+      <div>Hello {user.handle}</div>
       <div>You have made {state.count} markers</div>
       <AlertDialog>
         <AlertDialogTrigger className="bg-primary text-primary-foreground rounded-md px-4 py-2">

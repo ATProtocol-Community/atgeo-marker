@@ -1,34 +1,15 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { getUser } from "../Login";
-import { Loader, LoaderContainer } from "../ui/loader";
 import { LoggedInUserOptions } from "./LoggedInUserOptions";
+import { User } from "~/types/auth";
+import { useRouter } from "@tanstack/react-router";
+export default function AuthOptions({ user }: { user: User | null }) {
+  const router = useRouter();
 
-export default function AuthOptions() {
-  // TODO: user type
-  const [user, setUser] = useState<any | null | undefined>(undefined);
-  const [isLoading, setIsLoading] = useState(true);
-
-  useEffect(() => {
-    const fetchUser = async () => {
-      try {
-        const userData = await getUser();
-        setUser(userData);
-      } catch (error) {
-        console.error("Failed to fetch user:", error);
-        setUser(null);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    if (typeof window !== "undefined") {
-      fetchUser();
-    }
-  }, []);
-
-  if (isLoading || typeof window === "undefined") return <Loader />;
+  // Don't display the login button if the user is already on the login page
+  if (!user && router.matchRoute("/auth/login")) {
+    return null;
+  }
 
   if (!user)
     return (

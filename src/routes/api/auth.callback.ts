@@ -1,6 +1,7 @@
-import { redirect } from "@tanstack/react-router";
 import { createAPIFileRoute } from "@tanstack/react-start/api";
-import { getEvent, useSession } from "@tanstack/react-start/server";
+import { useSession } from "@tanstack/react-start/server";
+import { getEvent } from "@tanstack/react-start/server";
+import { SESSION_STORE_PASSWORD } from "~/components/auth/Login";
 import { oauthClient } from "~/lib/auth";
 
 export const APIRoute = createAPIFileRoute("/api/auth/callback")({
@@ -10,8 +11,7 @@ export const APIRoute = createAPIFileRoute("/api/auth/callback")({
 
     const event = getEvent();
     const session = await useSession(event, {
-      // TODO: obviously not a good idea to have a hardcoded password
-      password: "i too am a friend of goosetopher",
+      password: SESSION_STORE_PASSWORD,
     });
     await session.update({
       did: client.session.did,
