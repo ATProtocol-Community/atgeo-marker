@@ -6,18 +6,7 @@ import { useSession } from "@tanstack/react-start/server";
 import { getEvent } from "@tanstack/react-start/server";
 import { useFormStatus } from "react-dom";
 
-const SESSION_STORE_PASSWORD = "i too am a friend of goosetopher";
-
-export const createNewUserSession = async ({ did }: { did: string }) => {
-  const event = getEvent();
-  const session = await useSession(event, {
-    password: SESSION_STORE_PASSWORD,
-  });
-  await session.update({
-    did,
-  });
-  return session;
-};
+export const SESSION_STORE_PASSWORD = "i too am a friend of goosetopher";
 
 export const getUser = createServerFn({ method: "GET" }).handler(async () => {
   const event = getEvent();
@@ -85,8 +74,15 @@ const loginUser = createServerFn({ method: "POST" })
       // https://github.com/TanStack/router/issues/3820
       throw new Response("ok", { status: 302, headers: { Location: url } });
     }
-    // If login is successful, redirect to the home page
-    const session = await createNewUserSession({ did: agent.did });
+
+    // If login is successful, create a new session and redirect to the home page
+    const event = getEvent();
+    const session = await useSession(event, {
+      password: SESSION_STORE_PASSWORD,
+    });
+    await session.update({
+      did: agent.did,
+    });
     throw new Response("ok", { status: 302, headers: { Location: "/" } });
   });
 
