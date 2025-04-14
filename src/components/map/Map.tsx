@@ -1,36 +1,86 @@
-import { useState, useMemo, useEffect, useRef, useCallback } from "react";
-import { createRoot } from "react-dom/client";
+import { useState, useRef, useCallback, useMemo } from "react";
 import {
   Map as MapLibreMap,
-  Marker,
-  Popup,
+  Source,
+  Layer,
   NavigationControl,
   FullscreenControl,
   ScaleControl,
   GeolocateControl,
   ViewState,
   MapRef,
+  MapLayerMouseEvent,
 } from "react-map-gl/maplibre";
-import useSupercluster from "use-supercluster";
+// Import specific layer types for better type checking
+import type {
+  GeoJSONSource,
+  CircleLayerSpecification,
+  SymbolLayerSpecification,
+} from "maplibre-gl";
 import "maplibre-gl/dist/maplibre-gl.css";
 
 import STOPS from "../../../king_county_transit.json";
-import { Pin } from "lucide-react";
+
+// --- Layer Definitions ---
+
+// Cluster Circles Layer
+export const clusterLayer: CircleLayerSpecification = {
+  id: "clusters",
+  type: "circle",
+  source: "stops",
+  filter: ["has", "point_count"],
+  paint: {
+    "circle-color": [
+      "step",
+      ["get", "point_count"],
+      "#51bbd6",
+      100,
+      "#f1f075",
+      750,
+      "#f28cb1",
+    ],
+    "circle-stroke-color": "#fff",
+    "circle-stroke-width": 1,
+    "circle-radius": ["step", ["get", "point_count"], 20, 100, 30, 750, 40],
+  },
+};
+
+// Cluster Count Layer
+const clusterCountLayer: SymbolLayerSpecification = {
+  id: "cluster-count",
+  type: "symbol",
+  source: "stops",
+  filter: ["has", "point_count"],
+  layout: {
+    "text-field": "{point_count_abbreviated}",
+    "text-font": ["Noto Sans Bold"],
+    "text-size": 12,
+    "text-allow-overlap": true,
+    "text-ignore-placement": true,
+  },
+  paint: {
+    "text-color": "#000000", // Black text
+  },
+};
+
+// Unclustered Points Layer (Keep definition but comment out usage below)
+const unclusteredPointLayer: CircleLayerSpecification = {
+  id: "unclustered-point",
+  type: "circle",
+  source: "stops",
+  filter: ["!", ["has", "point_count"]],
+  paint: {
+    "circle-color": "#11b4da",
+    "circle-radius": 6,
+    "circle-stroke-width": 1,
+    "circle-stroke-color": "#fff",
+  },
+};
+
+// --- Component ---
 
 interface MapProps {
   animateIn?: boolean;
-}
-
-interface PointFeature {
-  type: "Feature";
-  properties: {
-    cluster: boolean;
-    stopId: string | number;
-  };
-  geometry: {
-    type: "Point";
-    coordinates: [number, number];
-  };
 }
 
 export default function Map({ animateIn = true }: MapProps) {
@@ -40,49 +90,32 @@ export default function Map({ animateIn = true }: MapProps) {
     zoom: 10,
     bearing: 0,
     pitch: 0,
-    // keep into account the header
     padding: { bottom: 0, top: 128, left: 0, right: 0 },
   });
 
   const isAnimating = useRef(animateIn);
   const mapRef = useRef<MapRef | null>(null);
-  const [bounds, setBounds] = useState<number[] | undefined>(undefined);
 
-  const points = useMemo(() => {
-    return STOPS.map(
-      (stop): PointFeature => ({
+  // TODO: find the lib this comes from
+  const stopsGeoJson = useMemo((): any => {
+    // (GeoJSON conversion logic remains the same)
+    return {
+      type: "FeatureCollection",
+      features: STOPS.map((stop) => ({
         type: "Feature",
-        properties: {
-          cluster: false,
-          stopId: stop.stop_id,
-        },
+        properties: { stopId: stop.stop_id, stopName: stop.stop_name },
         geometry: {
           type: "Point",
           coordinates: [stop.stop_lon, stop.stop_lat],
         },
-      }),
-    );
-  }, [STOPS]);
-
-  const { clusters, supercluster } = useSupercluster({
-    points: points,
-    bounds: bounds ? [bounds[0], bounds[1], bounds[2], bounds[3]] : undefined,
-    zoom: viewState.zoom,
-    options: { radius: 180, maxZoom: 17 },
-  });
-
-  const updateBounds = () => {
-    if (mapRef.current) {
-      const map = mapRef.current.getMap();
-      setBounds(map.getBounds().toArray().flat());
-    }
-  };
+      })),
+    };
+  }, []);
 
   const onMapLoad = useCallback(() => {
-    updateBounds();
-
-    // animation, but only if needed
+    // (Animation logic remains the same)
     if (animateIn && mapRef.current) {
+      isAnimating.current = true;
       mapRef.current.flyTo({
         center: [viewState.longitude, viewState.latitude],
         zoom: 16,
@@ -90,95 +123,85 @@ export default function Map({ animateIn = true }: MapProps) {
         pitch: 80,
         duration: 6000,
       });
+      isAnimating.current = false;
+    } else {
+      isAnimating.current = false;
     }
-  }, [animateIn, viewState.longitude, viewState.latitude, updateBounds]);
+    console.log("Map loaded, source and layers should be added.");
+  }, [animateIn, viewState.longitude, viewState.latitude]);
+
+  const onClick = useCallback((event: MapLayerMouseEvent) => {
+    // (Click logic remains the same, only checks cluster layer)
+    const map = mapRef.current;
+    if (!map || event.defaultPrevented) return;
+
+    const features = map.queryRenderedFeatures(event.point, {
+      layers: [clusterLayer.id],
+    });
+
+    if (features.length > 0) {
+      event.preventDefault();
+      console.log("Cluster clicked!");
+      const cluster = features[0];
+      const clusterId = cluster.properties?.cluster_id;
+      // coordinates should exist?
+      const [longitude, latitude] = (cluster.geometry as any).coordinates;
+      const source = map.getSource("stops") as GeoJSONSource | undefined;
+
+      if (!source?.getClusterExpansionZoom) {
+        console.error("Could not get source or getClusterExpansionZoom method");
+        return;
+      }
+
+      source.getClusterExpansionZoom(clusterId).then((zoom) => {
+        isAnimating.current = true;
+        mapRef.current?.flyTo({
+          center: [longitude, latitude],
+          zoom: zoom,
+          duration: 600,
+        });
+        isAnimating.current = false;
+      });
+    }
+  }, []);
+
+  const interactiveLayerIds = useMemo(() => [clusterLayer.id], []);
 
   return (
     <MapLibreMap
       ref={mapRef}
       {...viewState}
       onMove={(evt) => {
+        if (!isAnimating.current) setViewState(evt.viewState);
+      }}
+      onMoveEnd={(evt) => {
+        if (isAnimating.current) isAnimating.current = false;
         setViewState(evt.viewState);
-        isAnimating.current = false;
-        updateBounds();
       }}
       onLoad={onMapLoad}
-      mapStyle="https://gist.githubusercontent.com/espeon/de168da3748c9462e1186203c78221a3/raw/8b1e888003839c2c4dbbd14de3213f31f1ea0643/darkmode.json"
+      mapStyle="https://tiles.openfreemap.org/styles/liberty"
+      interactiveLayerIds={interactiveLayerIds}
+      onClick={onClick}
     >
-      <GeolocateControl
-        style={{
-          // move down b/c header
-          marginTop: "5rem",
-        }}
-        position="top-left"
-      />
+      <GeolocateControl style={{ marginTop: "5rem" }} position="top-left" />
       <FullscreenControl position="top-left" />
       <NavigationControl position="top-left" />
       <ScaleControl />
-      {clusters.map((cluster) => {
-        const [longitude, latitude] = cluster.geometry.coordinates;
-        const { cluster: isCluster, point_count: pointCount } =
-          cluster.properties as any;
 
-        if (isCluster) {
-          return (
-            <Marker
-              key={`cluster-${cluster.id}`}
-              latitude={latitude}
-              longitude={longitude}
-            >
-              <div
-                className="bg-primary-foreground flex items-center justify-center rounded-full border"
-                style={{
-                  width: `${20 + (pointCount / points.length) * 30}px`,
-                  height: `${20 + (pointCount / points.length) * 30}px`,
-                  fontSize: `${11 + (pointCount / points.length) * 10}px`,
-                }}
-                onClick={() => {
-                  if (!supercluster) return;
-                  const expansionZoom = Math.min(
-                    supercluster.getClusterExpansionZoom(cluster.id as number),
-                    20, // the max zoom level
-                  );
-                  // fly to location
-                  if (mapRef.current) {
-                    mapRef.current.flyTo({
-                      center: [longitude, latitude],
-                      zoom: expansionZoom,
-                      speed: 1.5,
-                    });
-                  } else {
-                    // fallback if we can't get the ref
-                    setViewState({
-                      ...viewState,
-                      longitude,
-                      latitude,
-                      zoom: expansionZoom,
-                    });
-                  }
-                }}
-              >
-                {pointCount}
-              </div>
-            </Marker>
-          );
-        }
+      <Source
+        id="stops"
+        type="geojson"
+        data={stopsGeoJson}
+        cluster={true}
+        clusterMaxZoom={16}
+        clusterRadius={50}
+      >
+        <Layer {...clusterLayer} beforeId={clusterCountLayer.id} />
 
-        return (
-          <Marker
-            key={`stop-${cluster.properties.stopId}`}
-            longitude={longitude}
-            latitude={latitude}
-            anchor="bottom"
-            onClick={(e) => {
-              e.originalEvent.stopPropagation();
-              // Handle individual marker click here if needed
-            }}
-          >
-            <Pin className="fill-background/50" />
-          </Marker>
-        );
-      })}
+        <Layer {...clusterCountLayer} />
+
+        <Layer {...unclusteredPointLayer} beforeId={clusterLayer.id} />
+      </Source>
     </MapLibreMap>
   );
 }
