@@ -1,17 +1,19 @@
 // Entry point for all routes in the application.
-import type { ReactNode } from "react";
 import {
   Outlet,
-  createRootRoute,
   HeadContent,
   Scripts,
+  createRootRouteWithContext,
 } from "@tanstack/react-router";
 import appCss from "~/styles/app.css?url";
 import Header from "~/components/Header";
 import { ThemeProvider } from "~/lib/ThemeProvider";
-import { Meta } from "@tanstack/react-start";
+import { getUser } from "~/components/auth/Login";
+import { User } from "~/types/auth";
 
-export const Route = createRootRoute({
+export const Route = createRootRouteWithContext<{
+  user: User | null;
+}>()({
   head: () => ({
     meta: [
       {
@@ -33,6 +35,10 @@ export const Route = createRootRoute({
     ],
   }),
   component: RootComponent,
+  beforeLoad: async () => {
+    const user = await getUser();
+    return { user: user ?? null };
+  },
 });
 
 function RootComponent() {
@@ -44,6 +50,7 @@ function RootComponent() {
 }
 
 function RootDocument({ children }: React.PropsWithChildren) {
+  const { user } = Route.useRouteContext();
   return (
     <html lang="en" suppressHydrationWarning>
       <head>
@@ -51,7 +58,7 @@ function RootDocument({ children }: React.PropsWithChildren) {
       </head>
       <body>
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
-          <Header />
+          <Header user={user} />
           {children}
         </ThemeProvider>
         <Scripts />

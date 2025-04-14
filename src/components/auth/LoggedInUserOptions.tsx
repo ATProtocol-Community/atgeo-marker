@@ -7,9 +7,9 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "../ui/dropdown-menu";
-import { createServerFn } from "@tanstack/react-start";
-import { logoutFromBsky } from "~/lib/auth";
 import { Button } from "../ui/button";
+import { logoutUser } from "./Login";
+import { useRouter } from "@tanstack/react-router";
 
 export function LoggedInUserOptions({ user }: { user: User }) {
   return (
@@ -17,14 +17,15 @@ export function LoggedInUserOptions({ user }: { user: User }) {
       <DropdownMenuTrigger className="flex items-center justify-start w-max max-w-32 md:max-w-48 border rounded-full px-2 py-1 bg-accent">
         {user.avatar ? (
           <img
-            className="max-h-8 aspect-square max-w-8 rounded-full border w-full"
+            className="max-h-8 rounded-full border w-full object-cover"
             src={user.avatar}
             alt={user.displayName}
           />
         ) : (
           <div className="max-h-10 rounded-full bg-gray-200 w-full" />
         )}
-        <div className="line-clamp-1 px-2">
+
+        <div className="overflow-clip whitespace-nowrap overflow-ellipsis max-w-32">
           {user.displayName || user.handle || user.did}
         </div>
       </DropdownMenuTrigger>
@@ -40,11 +41,23 @@ export function LoggedInUserOptions({ user }: { user: User }) {
 }
 
 function LogoutOptions({ user }: { user: User }) {
+  const router = useRouter();
   return (
-    <form className="" method="POST" encType="multipart/form-data">
+    <form
+      className="w-full h-full"
+      method="POST"
+      encType="multipart/form-data"
+      action={logoutUser.url}
+      onSubmit={async (e) => {
+        e.preventDefault();
+        const formData = new FormData(e.currentTarget);
+        await logoutUser({ data: formData });
+        router.invalidate();
+      }}
+    >
       {/* hidden input with DID */}
       <input type="hidden" name="did" value={user.did} />
-      <Button size="sm" variant="ghost" className="p-0">
+      <Button size="sm" variant="ghost" className="w-full block p-0 text-left">
         Log out
       </Button>
     </form>
