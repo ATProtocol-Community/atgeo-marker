@@ -10,7 +10,7 @@ import { lexiconToZod } from "lexicon-to-zod";
 // TODO: swap with the generated lexicon
 import geomarkerLexicon from "~/lexicons/community/atprotocol/geomarker.json" with { type: "json" };
 import { cn } from "~/lib/utils";
-import { getUser } from "./Login";
+import { getUser } from "./auth/Login";
 import { Button } from "./ui/button";
 
 const schemaMap = lexiconToZod(geomarkerLexicon);
@@ -20,11 +20,12 @@ const postMarker = createServerFn({ method: "POST" })
     if (!(formData instanceof FormData)) {
       throw new Error("Invalid form data");
     }
-    const parsed = schemaMap.defs.Marker.parse({
+    const parsed = schemaMap.defs.main.record.parse({
       label: formData.get("label"),
       location: formData.get("location"),
-      markedEntries: formData.get("markedEntries"),
+      markedEntries: formData.getAll("markedEntries"),
     });
+    console.log("parsed", parsed);
     return {
       label: formData.get("label"),
       location: formData.get("location"),
@@ -49,18 +50,21 @@ const postMarker = createServerFn({ method: "POST" })
       throw new Error("Failed to get marker agent");
     }
 
-    const marker =
-      await markerAgent.community.atprotocol.geomarker.marker.create(
-        {
-          repo: user.did,
-        },
-        {
-          label: data.label as string,
-          location: data.location as string,
-          markedEntries: [data.markedEntries as string],
-        }
-      );
+    // const marker =
+    //   await markerAgent.community.atprotocol.geomarker.marker.create(
+    //     {
+    //       repo: user.did,
+    //     },
+    //     {
+    //       label: data.label as string,
+    //       location: data.location as string,
+    //       markedEntries: [data.markedEntries as string],
+    //     }
+    //   );
 
+    let marker = {
+      uri: "https://pdsls.dev/marker",
+    };
     console.dir(marker, { depth: null });
 
     return { marker: marker.uri };
