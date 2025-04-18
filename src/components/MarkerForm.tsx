@@ -16,6 +16,9 @@ import hthreeLexicon from "~/lexicons/community/lexicon/location/hthree.json" wi
 import { type Record as MarkerRecord } from "~/generated/api/types/community/atprotocol/geomarker/marker";
 import { cn } from "~/lib/utils";
 import { getUser } from "./auth/Login";
+import { Country, CountryDropdown } from "./CountryDropdown";
+import { useState, useCallback } from "react";
+import { Button } from "./ui/button";
 
 const schemaMap = lexiconToZod(geomarkerLexicon);
 
@@ -25,41 +28,31 @@ const postMarker = createServerFn({ method: "POST" })
       throw new Error("Invalid form data");
     }
     console.log("formData", formData);
-    let parsed: MarkerRecord;
-    try {
-      parsed = schemaMap.defs.main.record.parse(
-        {
-          label: formData.get("label") ?? null,
-          location: {
-            type: "$community.lexicon.location.address",
-            value: {
-              // country: formData.get("location"),
-            },
-          },
-          markedEntries: formData.getAll("markedEntries"),
+    const parsed = schemaMap.defs.main.record.parse(
+      {
+        label: formData.get("label") || undefined,
+        location: {
+          $type: "community.lexicon.location.address",
+          country: formData.get("location"),
         },
-        {
-          followRefs: true,
-          lexiconDict: {
-            [geomarkerLexicon.id]: geomarkerLexicon.defs.main,
-            [addressLexicon.id]: addressLexicon.defs.main,
-            [geoLexicon.id]: geoLexicon.defs.main,
-            [fsqLexicon.id]: fsqLexicon.defs.main,
-            [hthreeLexicon.id]: hthreeLexicon.defs.main,
-          },
-        }
-      ) as MarkerRecord;
-      console.log("parsed", parsed);
-      return {
-        label: parsed.label,
-        location: parsed.location,
-        markedEntries: parsed.markedEntries,
-      };
-    } catch (e) {
-      console.error("Error parsing marker", parsed);
-      console.dir(e, { depth: null });
-      throw new Error("Invalid form data");
-    }
+        markedEntries: formData.getAll("markedEntries"),
+      },
+      {
+        followRefs: true,
+        lexiconDict: {
+          [geomarkerLexicon.id]: geomarkerLexicon.defs.main,
+          [addressLexicon.id]: addressLexicon.defs.main,
+          [geoLexicon.id]: geoLexicon.defs.main,
+          [fsqLexicon.id]: fsqLexicon.defs.main,
+          [hthreeLexicon.id]: hthreeLexicon.defs.main,
+        },
+      }
+    ) as MarkerRecord;
+    return {
+      label: parsed.label,
+      location: parsed.location,
+      markedEntries: parsed.markedEntries,
+    };
   })
   .handler(async ({ data }) => {
     const user = await getUser();
@@ -105,7 +98,9 @@ export function MarkerForm(props: {
   onNewMarker: (uri: string) => void;
 }) {
   const { pending } = useFormStatus();
+  const [location, setLocation] = useState<string | undefined>(undefined);
 
+  console.log("pending", pending);
   return (
     <main
       className={cn(
@@ -116,7 +111,7 @@ export function MarkerForm(props: {
       <form
         id={props.formId}
         className="flex flex-col w-md mx-auto gap-2"
-        //action={postMarker.url}
+        action={postMarker.url}
         method="POST"
         encType="multipart/form-data"
         onSubmit={async (event) => {
@@ -132,11 +127,18 @@ export function MarkerForm(props: {
           placeholder="Label"
           name="label"
         />
+        <CountryDropdown
+          placeholder="Country"
+          disabled={pending}
+          onChange={(country) => {
+            setLocation(country.name);
+          }}
+        />
         <Input
           disabled={pending}
-          type="text"
-          placeholder="Location"
+          type="hidden"
           name="location"
+          value={location ?? ""}
         />
         <Input
           disabled={pending}
@@ -144,7 +146,9 @@ export function MarkerForm(props: {
           placeholder="Marked Entries"
           name="markedEntries"
         />
-        {/* TODO: add a button to submit the form once it's not in the dialog */}
+        <Button type="submit" disabled={pending}>
+          {pending ? "Making Marker..." : "Make Marker"}
+        </Button>
       </form>
     </main>
   );
