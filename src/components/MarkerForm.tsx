@@ -9,9 +9,13 @@ import { useFormStatus } from "react-dom";
 import { lexiconToZod } from "lexicon-to-zod";
 // TODO: swap with the generated lexicon
 import geomarkerLexicon from "~/lexicons/community/atprotocol/geomarker.json" with { type: "json" };
+import addressLexicon from "~/lexicons/community/lexicon/location/address.json" with { type: "json" };
+import geoLexicon from "~/lexicons/community/lexicon/location/geo.json" with { type: "json" };
+import fsqLexicon from "~/lexicons/community/lexicon/location/fsq.json" with { type: "json" };
+import hthreeLexicon from "~/lexicons/community/lexicon/location/hthree.json" with { type: "json" };
+import { type Record as MarkerRecord } from "~/generated/api/types/community/atprotocol/geomarker/marker";
 import { cn } from "~/lib/utils";
 import { getUser } from "./auth/Login";
-import { Button } from "./ui/button";
 
 const schemaMap = lexiconToZod(geomarkerLexicon);
 
@@ -20,17 +24,42 @@ const postMarker = createServerFn({ method: "POST" })
     if (!(formData instanceof FormData)) {
       throw new Error("Invalid form data");
     }
-    const parsed = schemaMap.defs.main.record.parse({
-      label: formData.get("label"),
-      location: formData.get("location"),
-      markedEntries: formData.getAll("markedEntries"),
-    });
-    console.log("parsed", parsed);
-    return {
-      label: formData.get("label"),
-      location: formData.get("location"),
-      markedEntries: formData.get("markedEntries"),
-    };
+    console.log("formData", formData);
+    let parsed: MarkerRecord;
+    try {
+      parsed = schemaMap.defs.main.record.parse(
+        {
+          label: formData.get("label") ?? null,
+          location: {
+            type: "$community.lexicon.location.address",
+            value: {
+              // country: formData.get("location"),
+            },
+          },
+          markedEntries: formData.getAll("markedEntries"),
+        },
+        {
+          followRefs: true,
+          lexiconDict: {
+            [geomarkerLexicon.id]: geomarkerLexicon.defs.main,
+            [addressLexicon.id]: addressLexicon.defs.main,
+            [geoLexicon.id]: geoLexicon.defs.main,
+            [fsqLexicon.id]: fsqLexicon.defs.main,
+            [hthreeLexicon.id]: hthreeLexicon.defs.main,
+          },
+        }
+      ) as MarkerRecord;
+      console.log("parsed", parsed);
+      return {
+        label: parsed.label,
+        location: parsed.location,
+        markedEntries: parsed.markedEntries,
+      };
+    } catch (e) {
+      console.error("Error parsing marker", parsed);
+      console.dir(e, { depth: null });
+      throw new Error("Invalid form data");
+    }
   })
   .handler(async ({ data }) => {
     const user = await getUser();
