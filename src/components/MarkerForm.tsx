@@ -20,7 +20,17 @@ import { Country, CountryDropdown } from "./CountryDropdown";
 import { useState, useCallback } from "react";
 import { Button } from "./ui/button";
 
-const schemaMap = lexiconToZod(geomarkerLexicon);
+const lexiconDict = {
+  [geomarkerLexicon.id]: geomarkerLexicon,
+  [addressLexicon.id]: addressLexicon,
+  [geoLexicon.id]: geoLexicon,
+  [fsqLexicon.id]: fsqLexicon,
+  [hthreeLexicon.id]: hthreeLexicon,
+};
+const schemaMap = lexiconToZod(lexiconDict[geomarkerLexicon.id], {
+  lexiconDict,
+  followRefs: true,
+});
 
 const postMarker = createServerFn({ method: "POST" })
   .validator((formData: unknown) => {
@@ -28,26 +38,14 @@ const postMarker = createServerFn({ method: "POST" })
       throw new Error("Invalid form data");
     }
     console.log("formData", formData);
-    const parsed = schemaMap.defs.main.record.parse(
-      {
-        label: formData.get("label") || undefined,
-        location: {
-          $type: "community.lexicon.location.address",
-          country: formData.get("location"),
-        },
-        markedEntries: formData.getAll("markedEntries"),
+    const parsed = schemaMap.defs.main.record.parse({
+      label: formData.get("label") || undefined,
+      location: {
+        $type: "community.lexicon.location.address",
+        country: formData.get("location"),
       },
-      {
-        followRefs: true,
-        lexiconDict: {
-          [geomarkerLexicon.id]: geomarkerLexicon.defs.main,
-          [addressLexicon.id]: addressLexicon.defs.main,
-          [geoLexicon.id]: geoLexicon.defs.main,
-          [fsqLexicon.id]: fsqLexicon.defs.main,
-          [hthreeLexicon.id]: hthreeLexicon.defs.main,
-        },
-      }
-    ) as MarkerRecord;
+      markedEntries: formData.getAll("markedEntries"),
+    }) as MarkerRecord;
     return {
       label: parsed.label,
       location: parsed.location,
@@ -58,13 +56,6 @@ const postMarker = createServerFn({ method: "POST" })
     const user = await getUser();
     if (!user) {
       throw new Error("User not found");
-    }
-    const agent = await getLoggedInBskyAgent({ handle: user.handle });
-    if (!agent) {
-      const url = await loginToBsky({ user: user.handle });
-      // Cannot throw redirect here because of the following issue:
-      // https://github.com/TanStack/router/issues/3820
-      throw new Response("ok", { status: 302, headers: { Location: url } });
     }
 
     const markerAgent = await getLoggedInMarkerAgent({ handle: user.handle });
@@ -131,7 +122,7 @@ export function MarkerForm(props: {
           placeholder="Country"
           disabled={pending}
           onChange={(country) => {
-            setLocation(country.name);
+            setLocation(country.alpha2);
           }}
         />
         <Input

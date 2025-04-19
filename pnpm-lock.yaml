@@ -60,8 +60,8 @@ importers:
         specifier: ^0.5.0
         version: 0.5.0
       lexicon-to-zod:
-        specifier: ^1.0.2
-        version: 1.0.2
+        specifier: 1.1.0-rc.1
+        version: 1.1.0-rc.1
       lucide-react:
         specifier: ^0.487.0
         version: 0.487.0(react@19.1.0)
@@ -2828,8 +2828,8 @@ packages:
     resolution: {integrity: sha512-b94GiNHQNy6JNTrt5w6zNyffMrNkXZb3KTkCZJb2V1xaEGCk093vkZ2jk3tpaeP33/OiXC+WvK9AxUebnf5nbw==}
     engines: {node: '>= 0.6.3'}
 
-  lexicon-to-zod@1.0.2:
-    resolution: {integrity: sha512-ww6kLcIFVCwPRlGy5ZHhCTiDWLh2M73bI2CtzWRM3SSP/S39j+q496jSspf8d4fwImSFiVynhIxuCm95E4mhWg==}
+  lexicon-to-zod@1.1.0-rc.1:
+    resolution: {integrity: sha512-hVO9oCfDwDoJ9mAh92mDVeG3cwH+wZL59V15TxAvjyRvko9J6lZHmacPk4Zyi1+qnrgxxLjExysmGdtADHXJLg==}
     engines: {node: 22.x}
 
   lightningcss-darwin-arm64@1.29.2:
@@ -6755,7 +6755,7 @@ snapshots:
     dependencies:
       readable-stream: 2.3.8
 
-  lexicon-to-zod@1.0.2:
+  lexicon-to-zod@1.1.0-rc.1:
     dependencies:
       zod: 3.24.2
 
