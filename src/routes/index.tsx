@@ -1,5 +1,5 @@
 import { createFileRoute, Navigate } from "@tanstack/react-router";
-import { MarkerForm } from "~/components/MarkerForm";
+import { MarkerForm, MarkerView } from "~/components/MarkerForm";
 import { useState } from "react";
 
 export const Route = createFileRoute("/")({
@@ -17,7 +17,7 @@ export const Route = createFileRoute("/")({
 
 function Home() {
   const { user } = Route.useRouteContext();
-  const [markers, setMarkers] = useState<string[]>([]);
+  const [markers, setMarkers] = useState<MarkerView[]>([]);
 
   if (!user) {
     // redirect to /auth/login
@@ -29,15 +29,16 @@ function Home() {
       <div>Hello {user.handle}</div>
       <div>Make a Marker</div>
       <MarkerForm
-        formId="marker-form"
-        onNewMarker={(uri) => {
-          setMarkers([...markers, uri]);
+        onNewMarker={(response) => {
+          setMarkers((prev) => [...prev, response]);
         }}
       />
       <div>You have made these markers:</div>
       {markers.map((marker) => (
-        <div key={marker}>
-          <a href={`https://pdsls.dev/${marker}`}>{marker}</a>
+        <div key={marker.markerUri}>
+          <a href={`https://pdsls.dev/${marker.markerUri}`}>
+            📍 {marker.location} {!!marker.label && `— ${marker.label}ß`}
+          </a>
         </div>
       ))}
     </main>
