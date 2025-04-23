@@ -4,6 +4,7 @@ import { Agent } from "@atproto/api";
 import { nanoid } from "nanoid";
 import path from "path";
 import { mkdir, unlink, readFile, writeFile, rm } from "fs/promises";
+import { AtpBaseClient as MarkerAgent } from "~/generated/api";
 
 import type {
   NodeOAuthClientOptions,
@@ -108,9 +109,15 @@ const createClient = async () => {
 
 export const oauthClient = await createClient();
 
+// TODO: incredible HACK, DO NOT PUT THIS IN PRODUCTION
+let LOGGED_IN_AGENT: Agent | null = null;
 export const getLoggedInBskyAgent = async (
   user: { handle: string } | { did: string }
 ) => {
+  if (LOGGED_IN_AGENT && LOGGED_IN_AGENT.assertAuthenticated()) {
+    return LOGGED_IN_AGENT;
+  }
+
   const agent = new Agent("https://public.api.bsky.app");
   const did =
     "did" in user
@@ -126,6 +133,7 @@ export const getLoggedInBskyAgent = async (
       return agent;
     }
   } catch (e) {
+    LOGGED_IN_AGENT = null;
     if (e instanceof TokenRefreshError) {
       // Token refresh failed, so we need to login again
       return null;
@@ -133,6 +141,15 @@ export const getLoggedInBskyAgent = async (
     throw e;
   }
   return null;
+};
+
+export const getLoggedInMarkerAgent = async (user: { handle: string }) => {
+  const agent = await getLoggedInBskyAgent({ handle: user.handle });
+  if (!agent) {
+    return null;
+  }
+  const markerAgent = new MarkerAgent(agent.fetchHandler);
+  return markerAgent;
 };
 
 export async function loginToBsky({ user }: { user: string }) {
@@ -156,4 +173,5 @@ export async function loginToBsky({ user }: { user: string }) {
 
 export async function logoutFromBsky({ did }: { did: string }) {
   await oauthClient.revoke(did);
+  LOGGED_IN_AGENT = null;
 }

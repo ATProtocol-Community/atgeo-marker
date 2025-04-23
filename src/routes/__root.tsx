@@ -42,6 +42,7 @@ export const Route = createRootRouteWithContext<{
 });
 
 function RootComponent() {
+  const { user } = Route.useRouteContext();
   return (
     <RootDocument>
       <Outlet />

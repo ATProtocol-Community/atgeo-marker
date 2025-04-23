@@ -27,8 +27,9 @@ pnpm env use latest
 > sessions to disk. Must be heavily updated for real production use.
 
 0. Run `pnpm install`
-1. Run `pnpm dev`
-2. Go to `http://127.0.0.1/`
+1. Run `pnpm lexicon:generate` to generate the Lexicons code
+2. Run `pnpm dev`
+3. Go to `http://127.0.0.1/`
 
 ## Where to Go
 
@@ -39,3 +40,7 @@ pnpm env use latest
   There's no real validation logic.
 - To log out, delete the `.tokens/` folder. And feel free to implement a real
   auth flow!
+
+## Quality of Life Stuff
+
+- You can add `DEFAULT_USER=your-pds-url` in `.env` to have the login automatically prefilled
