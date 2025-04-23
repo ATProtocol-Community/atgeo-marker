@@ -14,9 +14,15 @@ importers:
       '@atproto/jwk-jose':
         specifier: ^0.1.5
         version: 0.1.5
+      '@atproto/lexicon':
+        specifier: ^0.4.10
+        version: 0.4.10
       '@atproto/oauth-client-node':
         specifier: ^0.2.14
         version: 0.2.14
+      '@atproto/xrpc':
+        specifier: ^0.6.12
+        version: 0.6.12
       '@radix-ui/react-alert-dialog':
         specifier: ^1.1.6
         version: 1.1.6(@types/react-dom@19.1.1(@types/react@19.1.0))(@types/react@19.1.0)(react-dom@19.1.0(react@19.1.0))(react@19.1.0)

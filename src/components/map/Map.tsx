@@ -10,22 +10,46 @@ import {
   ViewState,
   MapRef,
   MapLayerMouseEvent,
+  Popup,
 } from "react-map-gl/maplibre";
 
 import type {
+  Feature,
+  Point,
   GeoJSONSource,
   CircleLayerSpecification,
   SymbolLayerSpecification,
 } from "maplibre-gl";
 import "maplibre-gl/dist/maplibre-gl.css";
 
-import STOPS from "../../../king_county_transit.json";
 import { useTheme } from "~/lib/ThemeProvider";
+import { Club } from "lucide-react";
+
+// Define the Geomarker type based on the lexicon (specifically the geo location part)
+interface GeoLocation {
+  $type: "community.lexicon.location.geo";
+  name?: string;
+  latitude: string;
+  longitude: string;
+  altitude?: string;
+}
+
+interface Geomarker {
+  label: string;
+  location: GeoLocation; // Assuming only GeoLocation for now
+  markedEntries?: string[];
+}
+
+// Define properties for GeoJSON features derived from Geomarkers
+interface GeomarkerFeatureProperties {
+  markerLabel: string;
+  // Add other properties from Geomarker if needed later
+}
 
 export const clusterLayer: CircleLayerSpecification = {
   id: "clusters",
   type: "circle",
-  source: "stops",
+  source: "markers", // Renamed source ID
   filter: ["has", "point_count"],
   paint: {
     "circle-color": [
@@ -46,7 +70,7 @@ export const clusterLayer: CircleLayerSpecification = {
 const clusterCountLayer: SymbolLayerSpecification = {
   id: "cluster-count",
   type: "symbol",
-  source: "stops",
+  source: "markers", // Renamed source ID
   filter: ["has", "point_count"],
   layout: {
     "text-field": "{point_count_abbreviated}",
@@ -63,7 +87,7 @@ const clusterCountLayer: SymbolLayerSpecification = {
 const unclusteredPointLayer: CircleLayerSpecification = {
   id: "unclustered-point",
   type: "circle",
-  source: "stops",
+  source: "markers", // Renamed source ID
   filter: ["!", ["has", "point_count"]],
   paint: {
     "circle-color": "#11b4da",
@@ -73,11 +97,20 @@ const unclusteredPointLayer: CircleLayerSpecification = {
   },
 };
 
+interface PopupInfo {
+  longitude: number;
+  latitude: number;
+  label: string;
+}
+
 interface MapProps {
+  geomarkers: Geomarker[]; // Accept Geomarkers as a prop
   animateIn?: boolean;
 }
 
-export default function Map({ animateIn = true }: MapProps) {
+export default function Map({ geomarkers, animateIn = true }: MapProps) {
+  const [popupInfo, setPopupInfo] = useState<PopupInfo | null>(null);
+
   const [viewState, setViewState] = useState<ViewState>({
     latitude: 47.620422,
     longitude: -122.349358,
@@ -92,20 +125,31 @@ export default function Map({ animateIn = true }: MapProps) {
 
   const theme = useTheme();
 
-  // TODO: find the lib this comes from
-  const stopsGeoJson = useMemo((): any => {
+  // Use the geomarkers prop to create GeoJSON
+  // find out what package this is from :sob:
+  const markersGeoJson = useMemo((): any => {
     return {
       type: "FeatureCollection",
-      features: STOPS.map((stop) => ({
-        type: "Feature",
-        properties: { stopId: stop.stop_id, stopName: stop.stop_name },
-        geometry: {
-          type: "Point",
-          coordinates: [stop.stop_lon, stop.stop_lat],
-        },
-      })),
+      features: geomarkers
+        // Filter out any markers that don't have the expected geo location
+        .filter(
+          (marker) =>
+            marker.location?.$type === "community.lexicon.location.geo",
+        )
+        .map((marker): any => ({
+          type: "Feature",
+          properties: { markerLabel: marker.label }, // Use marker.label
+          geometry: {
+            type: "Point",
+            // Parse lat/lon strings to numbers for GeoJSON coordinates
+            coordinates: [
+              parseFloat(marker.location.longitude),
+              parseFloat(marker.location.latitude),
+            ],
+          },
+        })),
     };
-  }, []);
+  }, [geomarkers]); // Depend on the geomarkers prop
 
   const onMapLoad = useCallback(() => {
     if (animateIn && mapRef.current) {
@@ -129,17 +173,36 @@ export default function Map({ animateIn = true }: MapProps) {
     if (!map || event.defaultPrevented) return;
 
     const features = map.queryRenderedFeatures(event.point, {
-      layers: [clusterLayer.id],
+      layers: [clusterLayer.id, unclusteredPointLayer.id],
     });
 
-    if (features.length > 0) {
+    console.log(features);
+
+    // get features.unclusteredPoints
+    const unclusteredPoints = features.filter(
+      (feature) => feature.layer.id === unclusteredPointLayer.id,
+    );
+
+    // get features.clusteredPoints
+    const clusteredPoints = features.filter(
+      (feature) => feature.layer.id === clusterLayer.id,
+    );
+
+    if (clusteredPoints.length > 0) {
       event.preventDefault();
       console.log("Cluster clicked!");
-      const cluster = features[0];
+      const cluster = clusteredPoints[0];
       const clusterId = cluster.properties?.cluster_id;
-      // coordinates should exist?
-      const [longitude, latitude] = (cluster.geometry as any).coordinates;
-      const source = map.getSource("stops") as GeoJSONSource | undefined;
+      // Ensure geometry is Point before accessing coordinates
+      if (cluster.geometry?.type !== "Point") {
+        console.error(
+          "Clicked cluster feature geometry is not a Point:",
+          cluster.geometry,
+        );
+        return;
+      }
+      const [longitude, latitude] = cluster.geometry.coordinates;
+      const source = map.getSource("markers") as GeoJSONSource | undefined; // Use renamed source ID
 
       if (!source?.getClusterExpansionZoom) {
         console.error("Could not get source or getClusterExpansionZoom method");
@@ -155,10 +218,32 @@ export default function Map({ animateIn = true }: MapProps) {
         });
         isAnimating.current = false;
       });
+    } else if (features.length > 0) {
+      event.preventDefault();
+      const point = features[0];
+      if (!point.geometry || point.geometry.type !== "Point") {
+        console.error(
+          "Clicked feature geometry is not a Point:",
+          point.geometry,
+        );
+        return;
+      }
+      const [longitude, latitude] = point.geometry.coordinates;
+      const label = point.properties?.markerLabel ?? "No label"; // Get label from properties
+
+      console.log("Marker clicked:", label);
+      setPopupInfo({ longitude, latitude, label }); // Set popup info
+    } else {
+      event.preventDefault();
+      console.log("No features clicked");
+      setPopupInfo(null); // Clear popup info
     }
   }, []);
 
-  const interactiveLayerIds = useMemo(() => [clusterLayer.id], []);
+  const interactiveLayerIds = useMemo(
+    () => [clusterLayer.id, unclusteredPointLayer.id],
+    [],
+  );
 
   const mapStyle = useMemo(() => {
     return theme.theme === "dark"
@@ -187,20 +272,37 @@ export default function Map({ animateIn = true }: MapProps) {
       <NavigationControl position="top-left" />
       <ScaleControl />
 
+      {/* Update Source to use the new GeoJSON data and ID */}
       <Source
-        id="stops"
+        id="markers" // Renamed source ID
         type="geojson"
-        data={stopsGeoJson}
+        data={markersGeoJson} // Use the new GeoJSON derived from props
         cluster={true}
-        clusterMaxZoom={16}
-        clusterRadius={50}
+        clusterMaxZoom={16} // Kept existing cluster settings
+        clusterRadius={50} // Kept existing cluster settings
       >
+        {/* Layers now reference the renamed source ID 'markers' */}
         <Layer {...clusterLayer} beforeId={clusterCountLayer.id} />
-
         <Layer {...clusterCountLayer} />
-
         <Layer {...unclusteredPointLayer} beforeId={clusterLayer.id} />
       </Source>
+
+      {popupInfo && (
+        <Popup
+          longitude={popupInfo.longitude}
+          latitude={popupInfo.latitude}
+          anchor="bottom"
+          onClose={() => setPopupInfo(null)} // Allow closing the popup
+          closeButton={true}
+          closeOnClick={false} // Keep popup open when map is clicked elsewhere
+          className="text-gray-800"
+        >
+          {/* Render the content here. For now, just the label. */}
+          {popupInfo.label}
+          {/* You can replace the line above with a component rendering the post */}
+          {/* e.g., <PostComponent markerLabel={popupInfo.label} /> */}
+        </Popup>
+      )}
     </MapLibreMap>
   );
 }
