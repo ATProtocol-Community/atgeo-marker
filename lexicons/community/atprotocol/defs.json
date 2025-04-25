@@ -1,0 +1,51 @@
+{
+  "lexicon": 1,
+  "id": "community.atprotocol.geomarker.defs",
+  "defs": {
+    "markerView": {
+      "type": "object",
+      "required": ["location"],
+      "properties": {
+        "label": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 800,
+          "maxGraphemes": 400,
+          "description": "The label of the geographic marker."
+        },
+        "location": {
+          "type": "union",
+          "refs": [
+            "community.lexicon.location.address",
+            "community.lexicon.location.geo",
+            "community.lexicon.location.fsq",
+            "community.lexicon.location.hthree"
+          ],
+          "description": "The location of the geographic marker. Could be an address, a geo coordinate, a foursquare venue, or a hThree venue."
+        },
+        "markedEntries": {
+          "type": "array",
+          "items": {
+            "type": "ref",
+            "ref": "#entryView"
+          },
+          "description": "A list of entries associated with this geographic marker."
+        }
+      }
+    },
+    "entryView": {
+      "type": "object",
+      "properties": {
+        "uri": {
+          "type": "string",
+          "format": "at-uri"
+        },
+        "record": {
+          "type": "union",
+          "refs": ["app.bsky.feed.post", "com.whtwnd.blog.entry"],
+          "description": "The hydrated record associated with this entry. Since this is a open union, it is possible that the record is of a type other than the ones listed."
+        }
+      }
+    }
+  }
+}

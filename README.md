@@ -27,9 +27,10 @@ pnpm env use latest
 > sessions to disk. Must be heavily updated for real production use.
 
 0. Run `pnpm install`
-1. Run `pnpm lexicon:generate` to generate the Lexicons code
-2. Run `pnpm dev`
-3. Go to `http://127.0.0.1/`
+1. Run `pnpx @atproto/lex-cli gen-api ./generated/api ./lexicons/**/*.json` to generate the Lexicons client code
+2. Run `pnpx @atproto/lex-cli gen-server ./generated/server ./lexicons/**/*.json` to generate the Lexicons server code
+3. Run `pnpm dev`
+4. Go to `http://127.0.0.1/`
 
 ## Where to Go
 
