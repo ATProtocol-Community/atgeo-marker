@@ -1,6 +1,6 @@
 {
   "lexicon": 1,
-  "id": "community.atprotocol.geomarker.collection",
+  "id": "community.atprotocol.geomarker.map",
   "defs": {
     "main": {
       "type": "record",
@@ -32,7 +32,7 @@
               "type": "ref",
               "ref": "community.atprotocol.geomarker.marker#main"
             },
-            "description": "An array of marker objects associated with this location collection"
+            "description": "An array of marker objects associated with this location map"
           }
         }
       }
