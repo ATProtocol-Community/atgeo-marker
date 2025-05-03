@@ -18,6 +18,7 @@
     "@atproto/lexicon": "^0.4.10",
     "@atproto/oauth-client-node": "^0.2.14",
     "@atproto/xrpc": "^0.6.12",
+    "@atproto/xrpc-server": "^0.7.17",
     "@radix-ui/react-alert-dialog": "^1.1.6",
     "@radix-ui/react-dialog": "^1.1.10",
     "@radix-ui/react-dropdown-menu": "^2.1.6",
@@ -64,6 +65,7 @@
     "onlyBuiltDependencies": [
       "@biomejs/biome",
       "@parcel/watcher",
+      "cbor-extract",
       "esbuild"
     ]
   }
