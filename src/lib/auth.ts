@@ -118,11 +118,18 @@ export const getLoggedInBskyAgent = async (
     return LOGGED_IN_AGENT;
   }
 
-  const agent = new Agent("https://public.api.bsky.app");
   const did =
     "did" in user
       ? user.did
-      : (await agent.resolveHandle({ handle: user.handle })).data.did;
+      : await oauthClient.handleResolver.resolve(user.handle);
+
+  if (!did) {
+    throw new Error(
+      `Failed to resolve handle for user ${
+        "did" in user ? user.did : user.handle
+      }`
+    );
+  }
 
   try {
     const session = await oauthClient.restore(did);
@@ -143,27 +150,39 @@ export const getLoggedInBskyAgent = async (
   return null;
 };
 
-export const getLoggedInMarkerAgent = async (user: { handle: string }) => {
-  const agent = await getLoggedInBskyAgent({ handle: user.handle });
-  if (!agent) {
-    return null;
+export const getDidFromHandle = async ({ handle }: { handle: string }) => {
+  const did = await oauthClient.handleResolver.resolve(handle);
+  if (!did) {
+    throw new Error(`Failed to resolve did for user ${handle}`);
   }
-  const markerAgent = new MarkerAgent(agent.fetchHandler);
+  return did;
+};
+
+export const getLoggedInMarkerAgent = async (user: { handle: string }) => {
+  const did = await oauthClient.handleResolver.resolve(user.handle);
+  if (!did) {
+    throw new Error(`Failed to resolve did for user ${user.handle}`);
+  }
+  const session = await oauthClient.restore(did);
+  // Make sure the marker agent use the session's fetch handler for authenticated
+  // requests
+  const markerAgent = new MarkerAgent(session.fetchHandler.bind(session));
+  // // Forward requrests made by the marker agent to our AppView
+  markerAgent.setHeader(
+    "atproto-proxy",
+    `${process.env.MARKER_APPVIEW_DID}#geomarker_appview`
+  );
   return markerAgent;
 };
 
 export async function loginToBsky({ user }: { user: string }) {
-  const agent = new Agent("https://public.api.bsky.app");
-  const handle = await agent.resolveHandle({
-    handle: user,
-  });
-
-  if (!handle.success) {
-    throw new Error("Failed to resolve handle");
+  const did = await oauthClient.handleResolver.resolve(user);
+  if (!did) {
+    throw new Error(`Failed to resolve handle for user ${user}`);
   }
 
   const state = nanoid();
-  const url = await oauthClient.authorize(handle.data.did, {
+  const url = await oauthClient.authorize(did, {
     scope: "atproto transition:generic",
     state,
   });

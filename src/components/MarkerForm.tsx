@@ -10,10 +10,8 @@ import geoLexicon from "~/lexicons/community/lexicon/location/geo.json" with { t
 import fsqLexicon from "~/lexicons/community/lexicon/location/fsq.json" with { type: "json" };
 import hthreeLexicon from "~/lexicons/community/lexicon/location/hthree.json" with { type: "json" };
 import { type Record as MarkerRecord } from "~/generated/api/types/community/atprotocol/geomarker/marker";
-import { cn } from "~/lib/utils";
 import { getUser } from "./auth/Login";
-import { Country, CountryDropdown } from "./CountryDropdown";
-import { useState, useCallback } from "react";
+import { CountryDropdown } from "./CountryDropdown";
 import { Button } from "./ui/button";
 import { useForm, useStore } from "@tanstack/react-form";
 import { SafeParseReturnType, ZodError } from "zod";
@@ -86,6 +84,10 @@ const postMarker = createServerFn({ method: "POST" })
       throw new Error("Failed to get marker agent");
     }
 
+    const countryName = countries.all.find(
+      (country) => country.alpha2 === data.location.country
+    )?.name!;
+
     // TODO: uncomment this if you want to really make a marker
     // const marker =
     //   await markerAgent.community.atprotocol.geomarker.marker.create(
@@ -94,14 +96,14 @@ const postMarker = createServerFn({ method: "POST" })
     //     },
     //     {
     //       label: data.label as string,
-    //       location: data.location as string,
-    //       markedEntries: [data.markedEntries as string],
+    //       location: {
+    //         $type: "community.lexicon.location.address",
+    //         country: countryName,
+    //       },
+    //       markedEntries: data.markedEntries?.filter((entry) => entry.trim()),
     //     }
     //   );
 
-    const countryName = countries.all.find(
-      (country) => country.alpha2 === data.location.country
-    )?.name!;
     let marker = {
       uri: "https://pdsls.dev/marker",
     };
