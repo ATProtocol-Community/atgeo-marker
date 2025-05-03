@@ -15,7 +15,8 @@ import { CountryDropdown } from "./CountryDropdown";
 import { Button } from "./ui/button";
 import { useForm, useStore } from "@tanstack/react-form";
 import { SafeParseReturnType, ZodError } from "zod";
-import { countries, lookup } from "country-data-list";
+import { countries } from "country-data-list";
+import { MarkerView } from "~/generated/api/types/community/atprotocol/geomarker/defs";
 
 const lexiconDict = {
   [geomarkerLexicon.id]: geomarkerLexicon,
@@ -28,13 +29,6 @@ const schemaMap = lexiconToZod(lexiconDict[geomarkerLexicon.id], {
   lexiconDict,
   followRefs: true,
 });
-
-export type MarkerView = {
-  markerUri: string;
-  label: string | undefined;
-  location: string;
-  markedEntries: string[] | undefined;
-};
 
 const postMarker = createServerFn({ method: "POST" })
   .validator(
@@ -89,30 +83,32 @@ const postMarker = createServerFn({ method: "POST" })
     )?.name!;
 
     // TODO: uncomment this if you want to really make a marker
-    // const marker =
-    //   await markerAgent.community.atprotocol.geomarker.marker.create(
-    //     {
-    //       repo: user.did,
-    //     },
-    //     {
-    //       label: data.label as string,
-    //       location: {
-    //         $type: "community.lexicon.location.address",
-    //         country: countryName,
-    //       },
-    //       markedEntries: data.markedEntries?.filter((entry) => entry.trim()),
-    //     }
-    //   );
-
-    let marker = {
-      uri: "https://pdsls.dev/marker",
-    };
+    const marker =
+      await markerAgent.community.atprotocol.geomarker.marker.create(
+        {
+          repo: user.did,
+        },
+        {
+          label: data.label as string,
+          location: {
+            $type: "community.lexicon.location.address",
+            country: data.location.country,
+          },
+          markedEntries: data.markedEntries?.filter((entry) => entry.trim()),
+        }
+      );
 
     return {
-      markerUri: marker.uri,
+      // markerUri: marker.uri,
       label: data.label,
-      location: countryName,
-      markedEntries: data.markedEntries,
+      location: {
+        $type: "community.lexicon.location.address",
+        country: data.location.country,
+      },
+      markedEntries: data.markedEntries?.map((entry) => ({
+        $type: "community.atprotocol.geomarker.defs#entryView",
+        uri: entry,
+      })),
     };
   });
 
@@ -126,15 +122,12 @@ export function MarkerForm(props: {
       location: "",
       markedEntries: [""],
     },
-    onSubmit: async ({ value }) => {
-      const response = await postMarker({ data: value });
-      props.onNewMarker(response);
-      return response;
-    },
     validators: {
       onSubmitAsync: async ({ value }) => {
         try {
-          await postMarker({ data: value });
+          const response = await postMarker({ data: value });
+          props.onNewMarker(response);
+          return response;
         } catch (error) {
           if (!("errors" in (error as any))) {
             return { form: "Failed to make marker" };
@@ -165,7 +158,7 @@ export function MarkerForm(props: {
       onSubmit={async (event) => {
         event.preventDefault();
         event.stopPropagation();
-        form.handleSubmit();
+        await form.handleSubmit();
       }}
     >
       <div className="flex flex-col gap-2  bg-gray-800 px-2 py-4 rounded-md">

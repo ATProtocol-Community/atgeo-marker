@@ -1,8 +1,9 @@
 import { createFileRoute, Navigate } from "@tanstack/react-router";
-import { MarkerForm, MarkerView } from "~/components/MarkerForm";
+import { MarkerForm } from "~/components/MarkerForm";
 import { useState } from "react";
 import { getLoggedInMarkerAgent, getDidFromHandle } from "~/lib/auth";
 import { createServerFn } from "@tanstack/react-start";
+import { MarkerView } from "~/generated/api/types/community/atprotocol/geomarker/defs";
 
 const getMarkersForHandle = createServerFn({ method: "GET" })
   .validator(async (params: { handle: string }) => {
@@ -22,7 +23,7 @@ const getMarkersForHandle = createServerFn({ method: "GET" })
     }
     const markers = await markerAgent.community.atprotocol.geomarker.getMarkers(
       {
-        owner: loadedData.handle,
+        owner: loadedData.did,
       }
     );
 
@@ -75,9 +76,9 @@ function Home() {
       />
       <div>You have made these markers:</div>
       {markers.map((marker) => (
-        <div key={marker.markerUri}>
-          <a href={`https://pdsls.dev/${marker.markerUri}`}>
-            📍 {marker.location} {!!marker.label && `— ${marker.label}ß`}
+        <div key={marker.atUri}>
+          <a href={`https://pdsls.dev/${marker.atUri}`}>
+            📍 {marker.location.country} {!!marker.label && `— ${marker.label}`}
           </a>
         </div>
       ))}

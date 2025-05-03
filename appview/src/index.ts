@@ -2,6 +2,11 @@ import express from "express";
 import { createServer } from "generated/server";
 import { getDidManifest } from "./did";
 import dotenv from "dotenv";
+import { Agent } from "@atproto/api";
+import {
+  validateRecord,
+  Record as MarkerRecord,
+} from "~/generated/server/types/community/atprotocol/geomarker/marker";
 
 // Load .env file from both the current directory and parent directory
 // The first .env file takes precedence
@@ -37,16 +42,31 @@ const server = createServer({
 
 server.community.atprotocol.geomarker.getMarkers({
   handler: async ({ params, auth, req }) => {
-    console.dir(params, { depth: null });
-    console.dir(auth, { depth: null });
-    for (const key in req.headers) {
-      console.log(key, req.headers[key]);
-    }
-    // TODO: fetch markers from user PDS
+    const markerAgent = new Agent({
+      service: "https://bsky.social",
+    });
+
+    const markers = await markerAgent.com.atproto.repo.listRecords({
+      repo: params.owner,
+      collection: "community.atprotocol.geomarker.marker",
+      limit: 100,
+    });
+
     return {
       encoding: "application/json",
       body: {
-        markers: [],
+        markers: markers.data.records
+          .filter((record) => {
+            // Only return valid marker records
+            const marker = validateRecord<MarkerRecord>(record.value as any);
+            return marker.success;
+          })
+          .map((record) => {
+            return {
+              ...record.value,
+              atUri: record.uri,
+            };
+          }),
       },
     };
   },
