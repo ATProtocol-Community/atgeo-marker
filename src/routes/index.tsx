@@ -1,9 +1,11 @@
 import { createFileRoute, Navigate } from "@tanstack/react-router";
-import { MarkerForm } from "~/components/MarkerForm";
+import { MarkerForm } from "~/components/markers/MarkerForm";
 import { useState } from "react";
 import { getLoggedInMarkerAgent, getDidFromHandle } from "~/lib/auth";
 import { createServerFn } from "@tanstack/react-start";
 import { MarkerView } from "~/generated/api/types/community/atprotocol/geomarker/defs";
+import { InvalidRequestError } from "@atproto/xrpc-server";
+import { MarkerChip } from "~/components/markers/MarkerChip.jsx";
 
 const getMarkersForHandle = createServerFn({ method: "GET" })
   .validator(async (params: { handle: string }) => {
@@ -21,16 +23,25 @@ const getMarkersForHandle = createServerFn({ method: "GET" })
     if (!markerAgent) {
       throw new Error("Failed to get marker agent");
     }
-    const markers = await markerAgent.community.atprotocol.geomarker.getMarkers(
-      {
-        owner: loadedData.did,
-      }
-    );
+    try {
+      const markers =
+        await markerAgent.community.atprotocol.geomarker.getMarkers({
+          owner: loadedData.did,
+        });
 
-    if (!markers.success) {
-      throw new Error("Failed to get markers for did: " + loadedData.did);
+      if (!markers.success) {
+        throw new Error("Failed to get markers for did: " + loadedData.did);
+      }
+      return markers.data.markers;
+    } catch (error) {
+      if (error instanceof InvalidRequestError) {
+        console.error(
+          "Invalid request proxy",
+          markerAgent.headers.get("atproto-proxy")
+        );
+      }
+      throw error;
     }
-    return markers.data.markers;
   });
 
 export const Route = createFileRoute("/")({
@@ -76,11 +87,7 @@ function Home() {
       />
       <div>You have made these markers:</div>
       {markers.map((marker) => (
-        <div key={marker.atUri}>
-          <a href={`https://pdsls.dev/${marker.atUri}`}>
-            📍 {marker.location.country} {!!marker.label && `— ${marker.label}`}
-          </a>
-        </div>
+        <MarkerChip key={marker.atUri} marker={marker} />
       ))}
     </main>
   );

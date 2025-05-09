@@ -1,5 +1,5 @@
 import { createServerFn, json } from "@tanstack/react-start";
-import { Input } from "./ui/input";
+import { Input } from "../ui/input";
 import { getLoggedInMarkerAgent } from "~/lib/auth";
 import { useFormStatus } from "react-dom";
 import { lexiconToZod } from "lexicon-to-zod";
@@ -10,13 +10,16 @@ import geoLexicon from "~/lexicons/community/lexicon/location/geo.json" with { t
 import fsqLexicon from "~/lexicons/community/lexicon/location/fsq.json" with { type: "json" };
 import hthreeLexicon from "~/lexicons/community/lexicon/location/hthree.json" with { type: "json" };
 import { type Record as MarkerRecord } from "~/generated/api/types/community/atprotocol/geomarker/marker";
-import { getUser } from "./auth/Login";
+import { getUser } from "../auth/Login";
 import { CountryDropdown } from "./CountryDropdown";
-import { Button } from "./ui/button";
+import { Button } from "../ui/button";
 import { useForm, useStore } from "@tanstack/react-form";
 import { SafeParseReturnType, ZodError } from "zod";
-import { countries } from "country-data-list";
 import { MarkerView } from "~/generated/api/types/community/atprotocol/geomarker/defs";
+import {
+  isMain as isAddressMain,
+  Main as AddressMain,
+} from "~/generated/server/types/community/lexicon/location/address";
 
 const lexiconDict = {
   [geomarkerLexicon.id]: geomarkerLexicon,
@@ -29,6 +32,10 @@ const schemaMap = lexiconToZod(lexiconDict[geomarkerLexicon.id], {
   lexiconDict,
   followRefs: true,
 });
+
+const isAddress = (location: unknown): location is AddressMain => {
+  return isAddressMain(location);
+};
 
 const postMarker = createServerFn({ method: "POST" })
   .validator(
@@ -60,6 +67,11 @@ const postMarker = createServerFn({ method: "POST" })
           { status: 400 }
         );
       }
+
+      if (!isAddress(parsed.data.location)) {
+        throw new Error("Only address locations are supported");
+      }
+
       return {
         label: parsed.data.label,
         location: parsed.data.location,
@@ -78,10 +90,6 @@ const postMarker = createServerFn({ method: "POST" })
       throw new Error("Failed to get marker agent");
     }
 
-    const countryName = countries.all.find(
-      (country) => country.alpha2 === data.location.country
-    )?.name!;
-
     // TODO: uncomment this if you want to really make a marker
     const marker =
       await markerAgent.community.atprotocol.geomarker.marker.create(
@@ -99,7 +107,7 @@ const postMarker = createServerFn({ method: "POST" })
       );
 
     return {
-      // markerUri: marker.uri,
+      atUri: marker.uri,
       label: data.label,
       location: {
         $type: "community.lexicon.location.address",
