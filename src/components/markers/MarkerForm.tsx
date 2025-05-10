@@ -1,7 +1,6 @@
 import { createServerFn, json } from "@tanstack/react-start";
 import { Input } from "../ui/input";
 import { getLoggedInMarkerAgent } from "~/lib/auth";
-import { useFormStatus } from "react-dom";
 import { lexiconToZod } from "lexicon-to-zod";
 // TODO: swap with the generated lexicon
 import geomarkerLexicon from "~/lexicons/community/atprotocol/geomarker.json" with { type: "json" };
@@ -20,6 +19,7 @@ import {
   isMain as isAddressMain,
   Main as AddressMain,
 } from "~/generated/server/types/community/lexicon/location/address";
+import { toAtUri } from "~/lib/uris";
 
 const lexiconDict = {
   [geomarkerLexicon.id]: geomarkerLexicon,
@@ -90,7 +90,18 @@ const postMarker = createServerFn({ method: "POST" })
       throw new Error("Failed to get marker agent");
     }
 
-    // TODO: uncomment this if you want to really make a marker
+    const markedAtUris = await Promise.all(
+      (data.markedEntries ?? [])
+        .filter((entry) => entry.trim())
+        .map(async (entry) => {
+          const atUri = await toAtUri(entry);
+          if (!atUri) {
+            throw new Error("Failed to convert entry to atUri");
+          }
+          return atUri;
+        })
+    );
+
     const marker =
       await markerAgent.community.atprotocol.geomarker.marker.create(
         {
@@ -102,7 +113,7 @@ const postMarker = createServerFn({ method: "POST" })
             $type: "community.lexicon.location.address",
             country: data.location.country,
           },
-          markedEntries: data.markedEntries?.filter((entry) => entry.trim()),
+          markedEntries: markedAtUris,
         }
       );
 
@@ -113,9 +124,9 @@ const postMarker = createServerFn({ method: "POST" })
         $type: "community.lexicon.location.address",
         country: data.location.country,
       },
-      markedEntries: data.markedEntries?.map((entry) => ({
+      markedEntries: markedAtUris.map((uri) => ({
         $type: "community.atprotocol.geomarker.defs#entryView",
-        uri: entry,
+        uri: uri,
       })),
     };
   });

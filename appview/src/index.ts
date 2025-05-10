@@ -1,12 +1,13 @@
+import "@total-typescript/ts-reset";
+
 import express from "express";
 import { createServer } from "generated/server";
 import { getDidManifest } from "./did";
 import dotenv from "dotenv";
-import { Agent } from "@atproto/api";
-import {
-  validateRecord,
-  Record as MarkerRecord,
-} from "~/generated/server/types/community/atprotocol/geomarker/marker";
+import { Agent, AtUri } from "@atproto/api";
+import { fetchEntryView } from "./lib/entries";
+import { extractValidMarkerRecord } from "./lib/markers";
+import { EntryView } from "~/generated/server/types/community/atprotocol/geomarker/defs";
 
 // Load .env file from both the current directory and parent directory
 // The first .env file takes precedence
@@ -52,21 +53,34 @@ server.community.atprotocol.geomarker.getMarkers({
       limit: 100,
     });
 
+    const validMarkerRecords = markers.data.records
+      .map(extractValidMarkerRecord)
+      .filter(Boolean);
+
+    const atUriToView = new Map<string, EntryView>();
+    const allEntryUris = [
+      ...new Set(validMarkerRecords.flatMap((marker) => marker.markedEntries!)),
+    ];
+
+    // Wait for all AtURi to have a corresponding view fetched
+    await Promise.all(
+      allEntryUris.map(async (entryUri) => {
+        const view = await fetchEntryView({ entryUri: new AtUri(entryUri) });
+        atUriToView.set(entryUri, view);
+        return view;
+      })
+    );
+
     return {
       encoding: "application/json",
       body: {
-        markers: markers.data.records
-          .filter((record) => {
-            // Only return valid marker records
-            const marker = validateRecord<MarkerRecord>(record.value as any);
-            return marker.success;
-          })
-          .map((record) => {
-            return {
-              ...record.value,
-              atUri: record.uri,
-            };
-          }),
+        markers: validMarkerRecords.map((marker) => ({
+          ...marker,
+          $type: "community.atprotocol.geomarker.defs#markerView",
+          markedEntries: marker
+            .markedEntries!.map((entryUri) => atUriToView.get(entryUri))
+            .filter(Boolean),
+        })),
       },
     };
   },

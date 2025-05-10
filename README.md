@@ -8,6 +8,8 @@ Experiments](https://wiki.atprotocol.community/en/working-groups/atgeo/experimen
 - [Tanstack Start](https://tanstack.com/start/latest)
 - [Tailwind 4](https://tailwindcss.com/)
 - [Shadcn/ui Components](https://ui.shadcn.com/docs)
+- [lpm](https://github.com/lexicon-community/lpm)
+- [@proto/lex-cli](https://www.npmjs.com/package/@atproto/lex-cli)
 - [Gustopher](https://wiki.atprotocol.community/en/wiki/reference/community/lore/gustopher)
 
 ## How to Run
@@ -55,3 +57,4 @@ pnpm env use latest
 ## Quality of Life Stuff
 
 - You can add `DEFAULT_USER=your-pds-url` in `.env` to have the login automatically prefilled
+- Install a new lexicon with `deno run jsr:@lpm/cli add path.to.lexicon.def` (needs deno)
