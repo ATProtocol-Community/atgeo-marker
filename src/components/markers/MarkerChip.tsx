@@ -65,22 +65,13 @@ export const MarkerChip = ({ marker }: { marker: MarkerView }) => {
           <AddressChip marker={marker} location={location} />
         ))
         .when(isGeo<MarkerView["location"]>, (location) => (
-          <GeoChip
-            marker={marker}
-            location={location as CommunityLexiconLocationGeo.Main}
-          />
+          <GeoChip marker={marker} location={location} />
         ))
         .when(isFsq<MarkerView["location"]>, (location) => (
-          <FsqChip
-            marker={marker}
-            location={location as CommunityLexiconLocationFsq.Main}
-          />
+          <FsqChip marker={marker} location={location} />
         ))
         .when(isHthree<MarkerView["location"]>, (location) => (
-          <HthreeChip
-            marker={marker}
-            location={location as CommunityLexiconLocationHthree.Main}
-          />
+          <HthreeChip marker={marker} location={location} />
         ))
         .with({ $type: P.string }, (location) => (
           <div>Unknown location type: {location.$type}</div>
