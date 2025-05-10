@@ -18,7 +18,7 @@ export const fetchEntryView = async ({ entryUri }: { entryUri: AtUri }) => {
       uri: entryUri.toString(),
       record: {
         $type: collection,
-        text: record.data.value.text,
+        ...record.data.value,
       },
     } as const;
   }
