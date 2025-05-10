@@ -6,6 +6,10 @@ import {
 } from "~/generated/api";
 import { MarkerView } from "~/generated/api/types/community/atprotocol/geomarker/defs";
 import { match, P } from "ts-pattern";
+import { isMain as isAddress } from "~/generated/server/types/community/lexicon/location/address";
+import { isMain as isGeo } from "~/generated/server/types/community/lexicon/location/geo";
+import { isMain as isFsq } from "~/generated/server/types/community/lexicon/location/fsq";
+import { isMain as isHthree } from "~/generated/server/types/community/lexicon/location/hthree";
 
 const AddressChip = ({
   marker,
@@ -57,25 +61,22 @@ export const MarkerChip = ({ marker }: { marker: MarkerView }) => {
   return (
     <div>
       {match(marker.location)
-        .with({ $type: "community.lexicon.location.address" }, (location) => (
-          <AddressChip
-            marker={marker}
-            location={location as CommunityLexiconLocationAddress.Main}
-          />
+        .when(isAddress<MarkerView["location"]>, (location) => (
+          <AddressChip marker={marker} location={location} />
         ))
-        .with({ $type: "community.lexicon.location.geo" }, (location) => (
+        .when(isGeo<MarkerView["location"]>, (location) => (
           <GeoChip
             marker={marker}
             location={location as CommunityLexiconLocationGeo.Main}
           />
         ))
-        .with({ $type: "community.lexicon.location.fsq" }, (location) => (
+        .when(isFsq<MarkerView["location"]>, (location) => (
           <FsqChip
             marker={marker}
             location={location as CommunityLexiconLocationFsq.Main}
           />
         ))
-        .with({ $type: "community.lexicon.location.hthree" }, (location) => (
+        .when(isHthree<MarkerView["location"]>, (location) => (
           <HthreeChip
             marker={marker}
             location={location as CommunityLexiconLocationHthree.Main}
