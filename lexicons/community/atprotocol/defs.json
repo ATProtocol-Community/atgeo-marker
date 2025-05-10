@@ -6,7 +6,7 @@
       "type": "object",
       "required": ["location"],
       "properties": {
-        "atUri": {
+        "uri": {
           "type": "string",
           "format": "at-uri"
         },

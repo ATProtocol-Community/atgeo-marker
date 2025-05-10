@@ -87,7 +87,7 @@ function Home() {
       />
       <div>You have made these markers:</div>
       {markers.map((marker) => (
-        <MarkerChip key={marker.atUri} marker={marker} />
+        <MarkerChip key={marker.uri} marker={marker} />
       ))}
     </main>
   );

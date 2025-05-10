@@ -16,16 +16,18 @@ export const fetchEntryView = async ({ entryUri }: { entryUri: AtUri }) => {
     return {
       $type: "community.atprotocol.geomarker.defs#entryView",
       uri: entryUri.toString(),
-      record: {
-        $type: collection,
-        ...record.data.value,
-      },
+      record: undefined,
+      // TODO: actually return the record once we figure out how to make it pass validation
+      // record: {
+      //   $type: collection,
+      //   ...record.data.value,
+      // },
     } as const;
   }
 
   return {
     $type: "community.atprotocol.geomarker.defs#entryView",
     uri: entryUri.toString(),
-    record: null,
+    record: undefined,
   } as const;
 };

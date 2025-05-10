@@ -20,7 +20,7 @@ const AddressChip = ({
 }) => {
   return (
     <div>
-      <a href={`https://pdsls.dev/${marker.atUri}`}>
+      <a href={`https://pdsls.dev/${marker.uri}`}>
         📍 {location.country} {!!marker.label && `— ${marker.label}`}
       </a>
     </div>

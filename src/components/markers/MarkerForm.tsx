@@ -118,7 +118,7 @@ const postMarker = createServerFn({ method: "POST" })
       );
 
     return {
-      atUri: marker.uri,
+      uri: marker.uri,
       label: data.label,
       location: {
         $type: "community.lexicon.location.address",
