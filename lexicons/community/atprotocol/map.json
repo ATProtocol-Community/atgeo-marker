@@ -1,0 +1,41 @@
+{
+  "lexicon": 1,
+  "id": "community.atprotocol.geomarker.map",
+  "defs": {
+    "main": {
+      "type": "record",
+      "key": "tid",
+      "record": {
+        "type": "object",
+        "required": ["markers"],
+        "properties": {
+          "label": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 800,
+            "maxGraphemes": 400
+          },
+          "description": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 6000,
+            "maxGraphemes": 12000
+          },
+          "associatedRecord": {
+            "type": "string",
+            "format": "at-uri",
+            "description": "The main entry associated with this geographic marker."
+          },
+          "markers": {
+            "type": "array",
+            "items": {
+              "type": "ref",
+              "ref": "community.atprotocol.geomarker.marker#main"
+            },
+            "description": "An array of marker objects associated with this marker map"
+          }
+        }
+      }
+    }
+  }
+}
