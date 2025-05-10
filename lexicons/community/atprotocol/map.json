@@ -7,7 +7,7 @@
       "key": "tid",
       "record": {
         "type": "object",
-        "required": ["locations"],
+        "required": ["markers"],
         "properties": {
           "label": {
             "type": "string",
@@ -18,21 +18,21 @@
           "description": {
             "type": "string",
             "minLength": 1,
-            "maxLength": 600,
-            "maxGraphemes": 1200
+            "maxLength": 6000,
+            "maxGraphemes": 12000
           },
-          "mainEntry": {
+          "associatedRecord": {
             "type": "string",
             "format": "at-uri",
             "description": "The main entry associated with this geographic marker."
           },
-          "locations": {
+          "markers": {
             "type": "array",
             "items": {
               "type": "ref",
               "ref": "community.atprotocol.geomarker.marker#main"
             },
-            "description": "An array of marker objects associated with this location map"
+            "description": "An array of marker objects associated with this marker map"
           }
         }
       }
