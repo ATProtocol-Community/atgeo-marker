@@ -4,3 +4,4 @@ node_modules
 .vinxi
 .tokens 
 generated/
+private_key.pem

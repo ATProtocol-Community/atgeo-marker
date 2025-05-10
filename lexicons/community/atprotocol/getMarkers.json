@@ -1,0 +1,36 @@
+{
+  "lexicon": 1,
+  "id": "community.atprotocol.geomarker.getMarkers",
+  "defs": {
+    "main": {
+      "type": "query",
+      "description": "Get a list of markers owned by a user",
+      "parameters": {
+        "type": "params",
+        "required": ["owner"],
+        "properties": {
+          "owner": {
+            "type": "string",
+            "format": "at-identifier"
+          }
+        }
+      },
+      "output": {
+        "encoding": "application/json",
+        "schema": {
+          "type": "object",
+          "required": ["markers"],
+          "properties": {
+            "markers": {
+              "type": "array",
+              "items": {
+                "type": "ref",
+                "ref": "community.atprotocol.geomarker.defs#markerView"
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

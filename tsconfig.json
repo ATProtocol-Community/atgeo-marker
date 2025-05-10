@@ -14,6 +14,7 @@
     "allowJs": true,
     "forceConsistentCasingInFileNames": true,
     "baseUrl": ".",
+    "types": ["urlpattern-polyfill"],
     "paths": {
       "~/*": ["./src/*"],
       "~/lexicons/*": ["./lexicons/*"],
