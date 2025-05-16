@@ -1,0 +1,19 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "atgeo-marker",
+  "main": ".output/server/index.mjs",
+  "compatibility_date": "2022-07-12",
+  "workers_dev": false,
+  "route": {
+    "pattern": "*.atgeo.app/*",
+    "zone_name": "atgeo.app",
+  },
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "markerdb",
+      "database_id": "c020574a-5623-407b-be0c-cd192bab9545",
+    },
+  ],
+  "compatibility_flags": ["nodejs_compat"],
+}
