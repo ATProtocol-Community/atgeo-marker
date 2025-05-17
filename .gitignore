@@ -5,3 +5,4 @@ node_modules
 .tokens 
 generated/
 private_key.pem
+db.sqlite
