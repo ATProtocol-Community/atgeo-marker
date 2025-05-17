@@ -9,12 +9,6 @@ export type Generated<T> = T extends ColumnType<infer S, infer I, infer U>
   ? ColumnType<S, I | undefined, U>
   : ColumnType<T, T | undefined, T>;
 
-export interface AuthSession {
-  expires_at: string;
-  id: string;
-  user_did: string;
-}
-
 export interface BskyAuthSessions {
   created_at: Generated<string>;
   key: string;
@@ -22,12 +16,11 @@ export interface BskyAuthSessions {
 }
 
 export interface BskyAuthState {
-  key: string | null;
+  key: string;
   state: string;
 }
 
 export interface DB {
-  auth_session: AuthSession;
   bsky_auth_sessions: BskyAuthSessions;
   bsky_auth_state: BskyAuthState;
 }

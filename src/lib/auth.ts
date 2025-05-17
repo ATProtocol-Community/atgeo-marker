@@ -2,8 +2,6 @@ import { NodeOAuthClient, TokenRefreshError } from "@atproto/oauth-client-node";
 import { JoseKey } from "@atproto/jwk-jose";
 import { Agent } from "@atproto/api";
 import { nanoid } from "nanoid";
-import path from "path";
-import { mkdir, unlink, readFile, writeFile, rm } from "fs/promises";
 import { AtpBaseClient as MarkerAgent } from "~/generated/api";
 
 import type {
@@ -13,55 +11,59 @@ import type {
   NodeSavedState,
   NodeSavedStateStore,
 } from "@atproto/oauth-client-node";
-
-const getChallengePath = ({ key }: { key: string }) =>
-  path.join(".tokens/challenges", key, "auth-challenge.json");
-
-const getSessionPath = ({ did }: { did: string }) =>
-  path.join(".tokens/sessions", did, "auth-session.json");
+import { db } from "~/db";
 
 class StateStore implements NodeSavedStateStore {
   async get(key: string): Promise<NodeSavedState | undefined> {
-    return JSON.parse(
-      await readFile(getChallengePath({ key }), "utf-8")
-    ) as NodeSavedState;
+    const stateByKey = await db
+      .selectFrom("bsky_auth_state")
+      .where("key", "=", key)
+      .selectAll()
+      .executeTakeFirst();
+
+    if (!stateByKey) {
+      return;
+    }
+    return JSON.parse(stateByKey.state) as NodeSavedState;
   }
   async set(key: string, val: NodeSavedState) {
-    const state = JSON.stringify(val);
-    await mkdir(path.dirname(getChallengePath({ key })), { recursive: true });
-    await writeFile(getChallengePath({ key }), state);
+    await db
+      .insertInto("bsky_auth_state")
+      .values({
+        key,
+        state: JSON.stringify(val),
+      })
+      .execute();
   }
   async del(key: string) {
-    const challengePath = getChallengePath({ key });
-    await unlink(challengePath);
-    await rm(path.dirname(challengePath), { recursive: true, force: true });
+    await db.deleteFrom("bsky_auth_state").where("key", "=", key).execute();
   }
 }
 
 class SessionStore implements NodeSavedSessionStore {
   async get(key: string): Promise<NodeSavedSession | undefined> {
-    try {
-      return JSON.parse(
-        await readFile(getSessionPath({ did: key }), "utf-8")
-      ) as NodeSavedSession;
-    } catch (e) {
-      if (e instanceof Error && e.message.includes("ENOENT")) {
-        return undefined;
-      }
-      throw e;
+    const sessionByKey = await db
+      .selectFrom("bsky_auth_sessions")
+      .where("key", "=", key)
+      .selectAll()
+      .executeTakeFirst();
+
+    if (!sessionByKey) {
+      return;
     }
+    return JSON.parse(sessionByKey.session) as NodeSavedSession;
   }
   async set(key: string, val: NodeSavedSession) {
-    const session = JSON.stringify(val);
-    await mkdir(path.dirname(getSessionPath({ did: key })), {
-      recursive: true,
-    });
-    await writeFile(getSessionPath({ did: key }), session);
+    await db
+      .insertInto("bsky_auth_sessions")
+      .values({
+        key,
+        session: JSON.stringify(val),
+      })
+      .execute();
   }
   async del(key: string) {
-    const sessionPath = getSessionPath({ did: key });
-    await unlink(sessionPath);
-    await rm(path.dirname(sessionPath), { recursive: true, force: true });
+    await db.deleteFrom("bsky_auth_sessions").where("key", "=", key).execute();
   }
 }
 
