@@ -11,17 +11,13 @@ export const fetchEntryView = async ({ entryUri }: { entryUri: AtUri }) => {
     collection,
     rkey: entryUri.rkey,
   });
-
   if (record.success) {
     return {
       $type: "community.atprotocol.geomarker.defs#entryView",
       uri: entryUri.toString(),
-      record: undefined,
-      // TODO: actually return the record once we figure out how to make it pass validation
-      // record: {
-      //   $type: collection,
-      //   ...record.data.value,
-      // },
+      record: {
+        ...record.data.value,
+      },
     } as const;
   }
 

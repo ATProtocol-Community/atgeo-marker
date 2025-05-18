@@ -78,6 +78,9 @@
       "better-sqlite3",
       "cbor-extract",
       "esbuild"
-    ]
+    ],
+    "patchedDependencies": {
+      "@atproto/lexicon@0.4.10": "patches/@atproto__lexicon@0.4.10.patch"
+    }
   }
 }

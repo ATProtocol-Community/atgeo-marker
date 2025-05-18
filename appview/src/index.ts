@@ -98,7 +98,7 @@ app.get("/.well-known/did.json", (_, res) => {
 });
 
 app.get("/", (_, res) => {
-  res.send("I live!");
+  res.send("The Geomarker AppView is live!");
 });
 
 app.listen(process.env.APPVIEW_PORT ?? 3000, () => {

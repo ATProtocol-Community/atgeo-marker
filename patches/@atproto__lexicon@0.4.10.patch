@@ -1,0 +1,39 @@
+diff --git a/dist/validators/complex.js b/dist/validators/complex.js
+index 0164bdbf220bb6897bc2fb61112de7bc4a05fa7c..e3feff7a779e8fd9aae14489ea87533b317f71e6 100644
+--- a/dist/validators/complex.js
++++ b/dist/validators/complex.js
+@@ -16,6 +16,8 @@ function validate(lexicons, path, def, value) {
+             return array(lexicons, path, def, value);
+         case 'blob':
+             return (0, blob_1.blob)(lexicons, path, def, value);
++        case 'record':
++            return record(lexicons, path, def, value);
+         default:
+             return (0, primitives_1.validate)(lexicons, path, def, value);
+     }
+@@ -118,6 +120,15 @@ function object(lexicons, path, def, value) {
+     }
+     return { success: true, value: resultValue };
+ }
++function record(lexicons, path, def, value) {
++    if (!(0, types_1.isObj)(value) || !('$type' in value)) {
++        return {
++            success: false,
++            error: new types_1.ValidationError(`${path} must be a record`),
++        };
++    }
++    return validateOneOf(lexicons, path, def, value, true);
++}
+ function validateOneOf(lexicons, path, def, value, mustBeObj = false) {
+     let concreteDef;
+     if (def.type === 'union') {
+@@ -143,6 +154,9 @@ function validateOneOf(lexicons, path, def, value, mustBeObj = false) {
+     else if (def.type === 'ref') {
+         concreteDef = lexicons.getDefOrThrow(def.ref);
+     }
++    else if (def.type === 'record') {
++        concreteDef = lexicons.getDefOrThrow(value.$type);
++    }
+     else {
+         concreteDef = def;
+     }

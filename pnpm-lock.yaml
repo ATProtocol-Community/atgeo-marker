@@ -4,6 +4,11 @@ settings:
   autoInstallPeers: true
   excludeLinksFromLockfile: false
 
+patchedDependencies:
+  '@atproto/lexicon@0.4.10':
+    hash: ddd4967767488a8aa29e15d288d391165c841d743811035194eee4ddd1de4bc2
+    path: patches/@atproto__lexicon@0.4.10.patch
+
 importers:
 
   .:
@@ -16,7 +21,7 @@ importers:
         version: 0.1.5
       '@atproto/lexicon':
         specifier: ^0.4.10
-        version: 0.4.10
+        version: 0.4.10(patch_hash=ddd4967767488a8aa29e15d288d391165c841d743811035194eee4ddd1de4bc2)
       '@atproto/oauth-client-node':
         specifier: ^0.2.14
         version: 0.2.14
@@ -4684,7 +4689,7 @@ snapshots:
   '@atproto/api@0.14.20':
     dependencies:
       '@atproto/common-web': 0.4.1
-      '@atproto/lexicon': 0.4.10
+      '@atproto/lexicon': 0.4.10(patch_hash=ddd4967767488a8aa29e15d288d391165c841d743811035194eee4ddd1de4bc2)
       '@atproto/syntax': 0.4.0
       '@atproto/xrpc': 0.6.12
       await-lock: 2.2.2
@@ -4734,7 +4739,7 @@ snapshots:
       multiformats: 9.9.0
       zod: 3.24.2
 
-  '@atproto/lexicon@0.4.10':
+  '@atproto/lexicon@0.4.10(patch_hash=ddd4967767488a8aa29e15d288d391165c841d743811035194eee4ddd1de4bc2)':
     dependencies:
       '@atproto/common-web': 0.4.1
       '@atproto/syntax': 0.4.0
@@ -4780,7 +4785,7 @@ snapshots:
     dependencies:
       '@atproto/common': 0.4.10
       '@atproto/crypto': 0.4.4
-      '@atproto/lexicon': 0.4.10
+      '@atproto/lexicon': 0.4.10(patch_hash=ddd4967767488a8aa29e15d288d391165c841d743811035194eee4ddd1de4bc2)
       '@atproto/xrpc': 0.6.12
       cbor-x: 1.6.0
       express: 4.21.2
@@ -4797,7 +4802,7 @@ snapshots:
 
   '@atproto/xrpc@0.6.12':
     dependencies:
-      '@atproto/lexicon': 0.4.10
+      '@atproto/lexicon': 0.4.10(patch_hash=ddd4967767488a8aa29e15d288d391165c841d743811035194eee4ddd1de4bc2)
       zod: 3.24.2
 
   '@babel/code-frame@7.26.2':

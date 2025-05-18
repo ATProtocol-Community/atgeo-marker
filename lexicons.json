@@ -3,6 +3,7 @@
     "community.lexicon.location.hthree",
     "community.lexicon.location.geo",
     "community.lexicon.location.fsq",
-    "community.lexicon.location.address"
+    "community.lexicon.location.address",
+    "app.bsky.feed.post"
   ]
 }
