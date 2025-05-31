@@ -1,13 +1,7 @@
 "use client";
 import { Anchor as PopoverAnchor } from "@radix-ui/react-popover";
 import { CommandInput } from "cmdk";
-import {
-  Bookmark,
-  LandPlot,
-  MapPin,
-  MapPinned,
-  PartyPopper,
-} from "lucide-react";
+import { MapPin } from "lucide-react";
 
 import { cn } from "../lib/utils";
 import {
@@ -20,87 +14,19 @@ import {
 } from "./ui/command";
 import { Input } from "./ui/input";
 import { Popover, PopoverContent } from "./ui/popover";
-import {
-  CommunityLexiconLocationAddress,
-  CommunityLexiconLocationFsq,
-  CommunityLexiconLocationHthree,
-} from "~/generated/api";
 import { match } from "ts-pattern";
 import React from "react";
 
-const sleep = (seconds: number) =>
-  new Promise((res) => setTimeout(res, seconds * 1000));
-
-interface GazeteerLocation {
-  source: string;
-  label: string;
-  sourceUri?: string;
-  location:
-    | CommunityLexiconLocationAddress.Main
-    | CommunityLexiconLocationHthree.Main
-    | CommunityLexiconLocationFsq.Main;
-  icon: React.ElementType;
-}
-
-const LOCATIONS: GazeteerLocation[] = [
-  {
-    source: "Open Maps",
-    label: "1000 Cool Location Avenue, Awesome City",
-    location: {
-      country: "US",
-      street: "1000 Cool Location Avenue",
-      locality: "Awesome City",
-    } satisfies CommunityLexiconLocationAddress.Main,
-    icon: MapPinned,
-  },
-  {
-    source: "4Square Places",
-    label: "Lit Event Venue @ 1000 Cool Location Avenue, Awesome City",
-    sourceUri: "at://FSQ_PROVIDED_DID/com.foursquare.venues/specific-venue-key",
-    location: {
-      name: "Lit Event Venue",
-      latitude: "1337",
-      longitude: "1337",
-      fsq_place_id: "0123456789",
-    } satisfies CommunityLexiconLocationFsq.Main,
-    icon: LandPlot,
-  },
-  {
-    source: "Hip Events in Your Area",
-    label:
-      "Eras Tour (May 2894) — Lit Event Venue @ 1000 Cool Location Avenue, Awesome City",
-    sourceUri: "at://HIP_EVENTS_DID/events.hipmaps.tours/specific-tour-key",
-    location: {
-      name: "Lit Event Venue",
-      latitude: "1337",
-      longitude: "1337",
-      fsq_place_id: "0123456789",
-    } satisfies CommunityLexiconLocationFsq.Main,
-    icon: PartyPopper,
-  },
-  {
-    source: "Your Relationship Diary",
-    label: "Our first date 💜 — Cool Location Avenue, Awesome City",
-    sourceUri: "at://USER_DID/diary.relationships.places/some-record-key",
-    location: {
-      name: "Cool Location Avenue, Awesome City",
-      value: "8549b11bfffffff",
-    } satisfies CommunityLexiconLocationHthree.Main,
-    icon: Bookmark,
-  },
-];
-
-const loadData = async (addressQuery: string) => {
-  await sleep(0.5);
-  return LOCATIONS;
-};
-
-export function Autocomplete() {
+export function Autocomplete<T extends { label: string }>(props: {
+  renderItem: (x: T) => React.ReactElement;
+  loadOptions: (query: string) => Promise<T[]>;
+  onSelect: (value: T | undefined) => void;
+}) {
   const [open, setOpen] = React.useState(false);
   const [search, setSearch] = React.useState("");
   const [value, setValue] = React.useState("");
   const [loading, setLoading] = React.useState(false);
-  const [options, setOptions] = React.useState<GazeteerLocation[]>([]);
+  const [options, setOptions] = React.useState<T[]>([]);
 
   return (
     <div className="flex items-center">
@@ -118,7 +44,7 @@ export function Autocomplete() {
                   return;
                 }
                 setLoading(true);
-                setOptions(await loadData(input));
+                setOptions(await props.loadOptions(input));
                 setLoading(false);
               }}
               onKeyDown={(e) => setOpen(e.key !== "Escape")}
@@ -172,17 +98,18 @@ export function Autocomplete() {
                           value={option.label}
                           onMouseDown={(e) => e.preventDefault()}
                           onSelect={(currentValue) => {
+                            const currentItem = options.find(
+                              (option) => option.label === currentValue
+                            );
                             setValue(
                               currentValue === value ? "" : currentValue
                             );
                             setSearch(
                               currentValue === value
                                 ? ""
-                                : options.find(
-                                    (location) =>
-                                      location.label === currentValue
-                                  )?.label ?? ""
+                                : currentItem?.label ?? ""
                             );
+                            props.onSelect(currentItem);
                             setOpen(false);
                           }}
                         >
@@ -194,14 +121,7 @@ export function Autocomplete() {
                                 : "opacity-0"
                             )}
                           />
-                          <div className="flex flex-col items-start gap-0 max-w-full truncate">
-                            <div className="text-nowrap max-w-full truncate">
-                              {option.label}
-                            </div>
-                            <div className="text-sm flex text-gray-400 items-center gap-1 max-w-full">
-                              <div>From: </div> {option.source} <option.icon />
-                            </div>
-                          </div>
+                          {props.renderItem(option)}
                         </CommandItem>
                       ))}
                     </CommandGroup>

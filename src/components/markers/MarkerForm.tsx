@@ -13,14 +13,14 @@ import { getUser } from "../auth/Login";
 import { CountryDropdown } from "./CountryDropdown";
 import { Button } from "../ui/button";
 import { useForm, useStore } from "@tanstack/react-form";
-import { SafeParseReturnType, ZodError } from "zod";
+import { SafeParseReturnType, z, ZodError } from "zod";
 import { MarkerView } from "~/generated/api/types/community/atprotocol/geomarker/defs";
 import {
   isMain as isAddressMain,
   Main as AddressMain,
 } from "~/generated/server/types/community/lexicon/location/address";
 import { toAtUri } from "~/lib/uris";
-import { Autocomplete } from "../Search";
+import { LocationSearch } from "./LocationSearch";
 
 const lexiconDict = {
   [geomarkerLexicon.id]: geomarkerLexicon,
@@ -38,6 +38,8 @@ const isAddress = (location: unknown): location is AddressMain => {
   return isAddressMain(location);
 };
 
+
+
 const postMarker = createServerFn({ method: "POST" })
   .validator(
     (
@@ -45,17 +47,34 @@ const postMarker = createServerFn({ method: "POST" })
         | FormData
         | {
             label: string;
-            location: string;
             markedEntries: string[];
+            "location.$type": "community.lexicon.location.address" | "community.lexicon.location.hthree" | "community.lexicon.location.fsq";
+            "location.country": string;
+            "location.latitude": string;
+            "location.longitude": string;
+            "location.fsq_place_id": string;
+            "location.value": string;
+            "location.name": string;
+            "location.region": string;
+            "location.street": string;
+            "location.locality": string;
           }
     ) => {
+      console.log("postMarker");
+      console.log("postMarker");
+      console.log("postMarker");
+      console.log("postMarker");
+
       const submittedData =
         data instanceof FormData ? Object.fromEntries(data.entries()) : data;
+      console.log(submittedData);
+      console.log(submittedData);
+      console.log(submittedData);
       const parsed = schemaMap.defs.main.record.safeParse({
         label: submittedData.label || undefined,
         location: {
           $type: "community.lexicon.location.address",
-          country: submittedData.location,
+          // country: submittedData.location,
         },
         markedEntries: submittedData.markedEntries,
       }) as SafeParseReturnType<unknown, MarkerRecord>;
@@ -139,31 +158,32 @@ export function MarkerForm(props: {
   const form = useForm({
     defaultValues: {
       label: "",
-      location: "",
       markedEntries: [""],
     },
     validators: {
-      onSubmitAsync: async ({ value }) => {
-        try {
-          const response = await postMarker({ data: value });
-          props.onNewMarker(response);
-          return response;
-        } catch (error) {
-          if (!("errors" in (error as any))) {
-            return { form: "Failed to make marker" };
-          }
-          const fieldsResponse = {
-            fields: (error as ZodError).errors.reduce(
-              (acc, error) => {
-                acc[error.path[0]] = error.message;
-                return acc;
-              },
-              {} as Record<string, string>
-            ),
-          };
-          return fieldsResponse;
-        }
-      },
+      onSubmit: z.any(),
+    //   onSubmitAsync: async ({ value }) => {
+    //     console.log(value);
+    //     try {
+    //       const response = await postMarker({ data: value });
+    //       props.onNewMarker(response);
+    //       return response;
+    //     } catch (error) {
+    //       if (!("errors" in (error as any))) {
+    //         return { form: "Failed to make marker" };
+    //       }
+    //       const fieldsResponse = {
+    //         fields: (error as ZodError).errors.reduce(
+    //           (acc, error) => {
+    //             acc[error.path[0]] = error.message;
+    //             return acc;
+    //           },
+    //           {} as Record<string, string>
+    //         ),
+    //       };
+    //       return fieldsResponse;
+    //     }
+    //   },
     },
   });
 
@@ -197,32 +217,18 @@ export function MarkerForm(props: {
           )}
         </form.Field>
         <div>Choose a location</div>
-        <form.Field name="location">
+        {/* <form.Field name="location">
           {(field) => (
-            <>
-              {/* <CountryDropdown
-                placeholder="Country"
-                disabled={isSubmitting}
-                onChange={(country) => {
-                  field.handleChange(country.alpha2);
-                }}
-                className="!bg-gray-600"
+            <> */}
+              <LocationSearch
+                // onSelectLocation={(location) => {
+                //   field.handleChange(location?.$type);
+                // }}
+                prefix="location"
               />
-              <Input
-                disabled={isSubmitting}
-                type="hidden"
-                name="location"
-                value={field.state.value}
-              />
-              {field.state.meta.errors.length > 0 ? (
-                <div role="alert" className="text-red-500">
-                  {field.state.meta.errors.join(", ")}
-                </div>
-              ) : null} */}
-              <Autocomplete />
-            </>
-          )}
-        </form.Field>
+            {/* </>
+          )} */}
+        {/* </form.Field> */}
         <form.Field name="markedEntries" mode="array">
           {(field) => (
             <div className="flex flex-col  gap-2">
