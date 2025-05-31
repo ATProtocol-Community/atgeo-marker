@@ -10,6 +10,9 @@ import { Input } from "../ui/input";
 import { useState } from "react";
 import { match, P } from "ts-pattern";
 
+import { fieldContext, useFieldContext, formContext } from "./LocationForm";
+import { createFormHook } from "@tanstack/react-form";
+
 const sleep = (seconds: number) =>
   new Promise((res) => setTimeout(res, seconds * 1000));
 
@@ -188,12 +191,18 @@ export const LocationSearch = (props: {
   ) => void;
   prefix: string;
 }) => {
+  const field = useFieldContext<
+    | CommunityLexiconLocationHthree.Main
+    | CommunityLexiconLocationFsq.Main
+    | CommunityLexiconLocationAddress.Main
+    | undefined
+  >();
   const [location, setLocation] = useState<
     | CommunityLexiconLocationHthree.Main
     | CommunityLexiconLocationFsq.Main
     | CommunityLexiconLocationAddress.Main
     | undefined
-  >(undefined);
+  >(field.state.value);
 
   return (
     <>
@@ -203,6 +212,7 @@ export const LocationSearch = (props: {
         onSelect={(item) => {
           setLocation(item?.location);
           props.onSelectLocation?.(item?.location);
+          field.handleChange(item?.location);
         }}
       />
       {match(location)
@@ -220,3 +230,12 @@ export const LocationSearch = (props: {
     </>
   );
 };
+
+export const { useAppForm, withForm } = createFormHook({
+  fieldContext,
+  formContext,
+  fieldComponents: {
+    LocationSearch,
+  },
+  formComponents: {},
+});

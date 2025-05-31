@@ -10,9 +10,8 @@ import fsqLexicon from "~/lexicons/community/lexicon/location/fsq.json" with { t
 import hthreeLexicon from "~/lexicons/community/lexicon/location/hthree.json" with { type: "json" };
 import { type Record as MarkerRecord } from "~/generated/api/types/community/atprotocol/geomarker/marker";
 import { getUser } from "../auth/Login";
-import { CountryDropdown } from "./CountryDropdown";
 import { Button } from "../ui/button";
-import { useForm, useStore } from "@tanstack/react-form";
+import { useStore } from "@tanstack/react-form";
 import { SafeParseReturnType, z, ZodError } from "zod";
 import { MarkerView } from "~/generated/api/types/community/atprotocol/geomarker/defs";
 import {
@@ -20,7 +19,10 @@ import {
   Main as AddressMain,
 } from "~/generated/server/types/community/lexicon/location/address";
 import { toAtUri } from "~/lib/uris";
-import { LocationSearch } from "./LocationSearch";
+import { LocationSearch, useAppForm } from "./LocationSearch";
+import { CommunityLexiconLocationAddress } from "~/generated/api";
+import { CommunityLexiconLocationHthree } from "~/generated/api";
+import { CommunityLexiconLocationFsq } from "~/generated/api";
 
 const lexiconDict = {
   [geomarkerLexicon.id]: geomarkerLexicon,
@@ -39,43 +41,24 @@ const isAddress = (location: unknown): location is AddressMain => {
 };
 
 
+type MarkerFormData = {
+  label: string;
+  markedEntries: string[];
+  location: CommunityLexiconLocationAddress.Main | CommunityLexiconLocationHthree.Main | CommunityLexiconLocationFsq.Main | undefined;
+}
 
 const postMarker = createServerFn({ method: "POST" })
   .validator(
     (
       data:
         | FormData
-        | {
-            label: string;
-            markedEntries: string[];
-            "location.$type": "community.lexicon.location.address" | "community.lexicon.location.hthree" | "community.lexicon.location.fsq";
-            "location.country": string;
-            "location.latitude": string;
-            "location.longitude": string;
-            "location.fsq_place_id": string;
-            "location.value": string;
-            "location.name": string;
-            "location.region": string;
-            "location.street": string;
-            "location.locality": string;
-          }
+        | MarkerFormData
     ) => {
-      console.log("postMarker");
-      console.log("postMarker");
-      console.log("postMarker");
-      console.log("postMarker");
-
       const submittedData =
         data instanceof FormData ? Object.fromEntries(data.entries()) : data;
-      console.log(submittedData);
-      console.log(submittedData);
-      console.log(submittedData);
       const parsed = schemaMap.defs.main.record.safeParse({
         label: submittedData.label || undefined,
-        location: {
-          $type: "community.lexicon.location.address",
-          // country: submittedData.location,
-        },
+        location: submittedData.location,
         markedEntries: submittedData.markedEntries,
       }) as SafeParseReturnType<unknown, MarkerRecord>;
 
@@ -86,10 +69,6 @@ const postMarker = createServerFn({ method: "POST" })
           },
           { status: 400 }
         );
-      }
-
-      if (!isAddress(parsed.data.location)) {
-        throw new Error("Only address locations are supported");
       }
 
       return {
@@ -129,10 +108,7 @@ const postMarker = createServerFn({ method: "POST" })
         },
         {
           label: data.label as string,
-          location: {
-            $type: "community.lexicon.location.address",
-            country: data.location.country,
-          },
+          location: data.location,
           markedEntries: markedAtUris,
         }
       );
@@ -140,10 +116,7 @@ const postMarker = createServerFn({ method: "POST" })
     return {
       uri: marker.uri,
       label: data.label,
-      location: {
-        $type: "community.lexicon.location.address",
-        country: data.location.country,
-      },
+      location: data.location,
       markedEntries: markedAtUris.map((uri) => ({
         $type: "community.atprotocol.geomarker.defs#entryView",
         uri: uri,
@@ -155,35 +128,35 @@ export function MarkerForm(props: {
   className?: string;
   onNewMarker: (response: MarkerView) => void;
 }) {
-  const form = useForm({
+  const form = useAppForm({
     defaultValues: {
       label: "",
       markedEntries: [""],
+      location: undefined as MarkerFormData["location"]
     },
     validators: {
       onSubmit: z.any(),
-    //   onSubmitAsync: async ({ value }) => {
-    //     console.log(value);
-    //     try {
-    //       const response = await postMarker({ data: value });
-    //       props.onNewMarker(response);
-    //       return response;
-    //     } catch (error) {
-    //       if (!("errors" in (error as any))) {
-    //         return { form: "Failed to make marker" };
-    //       }
-    //       const fieldsResponse = {
-    //         fields: (error as ZodError).errors.reduce(
-    //           (acc, error) => {
-    //             acc[error.path[0]] = error.message;
-    //             return acc;
-    //           },
-    //           {} as Record<string, string>
-    //         ),
-    //       };
-    //       return fieldsResponse;
-    //     }
-    //   },
+      onSubmitAsync: async ({ value }) => {
+        try {
+          const response = await postMarker({ data: value });
+          props.onNewMarker(response);
+          return response;
+        } catch (error) {
+          if (!("errors" in (error as any))) {
+            return { form: "Failed to make marker" };
+          }
+          const fieldsResponse = {
+            fields: (error as ZodError).errors.reduce(
+              (acc, error) => {
+                acc[error.path[0]] = error.message;
+                return acc;
+              },
+              {} as Record<string, string>
+            ),
+          };
+          return fieldsResponse;
+        }
+      },
     },
   });
 
@@ -217,18 +190,9 @@ export function MarkerForm(props: {
           )}
         </form.Field>
         <div>Choose a location</div>
-        {/* <form.Field name="location">
-          {(field) => (
-            <> */}
-              <LocationSearch
-                // onSelectLocation={(location) => {
-                //   field.handleChange(location?.$type);
-                // }}
-                prefix="location"
-              />
-            {/* </>
-          )} */}
-        {/* </form.Field> */}
+        <form.AppField name="location">
+          {(field) => <field.LocationSearch prefix={field.name} />}
+        </form.AppField>
         <form.Field name="markedEntries" mode="array">
           {(field) => (
             <div className="flex flex-col  gap-2">
