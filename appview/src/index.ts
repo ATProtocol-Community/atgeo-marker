@@ -105,6 +105,6 @@ app.listen(process.env.APPVIEW_PORT ?? 3000, () => {
   console.log(
     `Server is running on port ${process.env.APPVIEW_PORT ?? 3000} with did ${
       process.env.MARKER_APPVIEW_DID
-    }`
+    }. See it in (public) action at ${appviewServiceEndpoint}`
   );
 });

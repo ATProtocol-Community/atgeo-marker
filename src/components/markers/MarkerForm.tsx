@@ -20,6 +20,7 @@ import {
   Main as AddressMain,
 } from "~/generated/server/types/community/lexicon/location/address";
 import { toAtUri } from "~/lib/uris";
+import { Autocomplete } from "../Search";
 
 const lexiconDict = {
   [geomarkerLexicon.id]: geomarkerLexicon,
@@ -199,7 +200,7 @@ export function MarkerForm(props: {
         <form.Field name="location">
           {(field) => (
             <>
-              <CountryDropdown
+              {/* <CountryDropdown
                 placeholder="Country"
                 disabled={isSubmitting}
                 onChange={(country) => {
@@ -217,7 +218,8 @@ export function MarkerForm(props: {
                 <div role="alert" className="text-red-500">
                   {field.state.meta.errors.join(", ")}
                 </div>
-              ) : null}
+              ) : null} */}
+              <Autocomplete />
             </>
           )}
         </form.Field>

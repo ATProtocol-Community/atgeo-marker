@@ -15,6 +15,7 @@
   "author": "",
   "license": "MIT",
   "dependencies": {
+    "@algolia/autocomplete-js": "^1.19.2",
     "@atproto/api": "^0.14.20",
     "@atproto/jwk-jose": "^0.1.5",
     "@atproto/lexicon": "^0.4.10",
@@ -38,6 +39,7 @@
     "cmdk": "^1.1.1",
     "country-data-list": "^1.4.0",
     "geojson": "^0.5.0",
+    "instantsearch.css": "^8.5.1",
     "kysely": "^0.28.2",
     "lexicon-to-zod": "1.1.0-rc.1",
     "lucide-react": "^0.487.0",
@@ -64,7 +66,7 @@
     "@types/react-dom": "^19.1.1",
     "@vitejs/plugin-react": "^4.3.4",
     "kysely-codegen": "^0.18.5",
-    "kysely-ctl": "^0.12.2",
+    "kysely-ctl": "^0.13.0",
     "vite-tsconfig-paths": "^5.1.4"
   },
   "pnpm": {
