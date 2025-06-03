@@ -1,45 +1,41 @@
 FROM node:24 as base
 
-# Install dependencies only when needed
-FROM base AS deps
+FROM base AS builder
 WORKDIR /app
 
 COPY package.json pnpm-lock.yaml* ./
-RUN npm install -g pnpm && pnpm install --frozen-lockfile
 
-FROM base AS builder
-WORKDIR /app
-COPY --from=deps /app/node_modules ./node_modules
+RUN npm install -g pnpm && \
+    apt-get update && \
+    apt-get install -y --no-install-recommends zsh && \
+    rm -rf /var/lib/apt/lists/*
+
+RUN pnpm install --frozen-lockfile
+
 COPY . .
 
-RUN npm install -g pnpm
+RUN mkdir -p ./generated && \
+    zsh -c 'pnpx @atproto/lex-cli gen-api --yes ./generated/api ./lexicons/**/*.json \
+    && pnpx @atproto/lex-cli gen-server --yes ./generated/server ./lexicons/**/*.json'
 
-RUN apt-get update && apt-get install -y zsh
-
-# make lexdir if not exists
-RUN mkdir -p ./generated
-
-# Generate client + server lexicons
-RUN zsh -c 'pnpx @atproto/lex-cli gen-api --yes ./generated/api ./lexicons/**/*.json'
-RUN zsh -c 'pnpx @atproto/lex-cli gen-server --yes ./generated/server ./lexicons/**/*.json'
-
-RUN zsh -c 'echo /app/generated/**/*.ts'
 
 RUN pnpm build
 
-# stage 2
+# Runner stage
 FROM node:22-slim AS runner
 WORKDIR /app
 
 ENV NODE_ENV=production
 
 RUN addgroup --system --gid 1001 nodejs && \
-    adduser --system --uid 1001 nodejs
-RUN mkdir -p /app/data && \
+    adduser --system --uid 1001 nodejs && \
+    mkdir -p /app/data && \
     chown -R nodejs:nodejs /app/data
-COPY --from=builder . .
+
+COPY --from=builder /app .
+
 EXPOSE 3000
 
 USER nodejs
 
-CMD ["node", "app/.output/server/index.mjs"]
+CMD ["node", ".output/server/index.mjs"]
