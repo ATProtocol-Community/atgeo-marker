@@ -6,6 +6,7 @@ export default defineConfig({
     appDirectory: "./src",
   },
   server: {
+    preset: "node-server",
     esbuild: {
       options: {
         supported: {
