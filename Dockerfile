@@ -19,11 +19,11 @@ RUN apt-get update && apt-get install -y zsh
 # make lexdir if not exists
 RUN mkdir -p ./generated
 
-RUN zsh -c 'cat ./lexicons/**/*.json'
-
 # Generate client + server lexicons
-RUN zsh -c 'pnpx @atproto/lex-cli gen-api ./generated/api ./lexicons/**/*.json'
-RUN zsh -c 'pnpx @atproto/lex-cli gen-server ./generated/server ./lexicons/**/*.json'
+RUN zsh -c 'pnpx @atproto/lex-cli gen-api --yes ./generated/api ./lexicons/**/*.json'
+RUN zsh -c 'pnpx @atproto/lex-cli gen-server --yes ./generated/server ./lexicons/**/*.json'
+
+RUN zsh -c 'echo /app/generated/**/*.ts'
 
 RUN pnpm build
 
@@ -37,9 +37,9 @@ RUN addgroup --system --gid 1001 nodejs && \
     adduser --system --uid 1001 nodejs
 RUN mkdir -p /app/data && \
     chown -R nodejs:nodejs /app/data
-COPY --from=builder /app ./
+COPY --from=builder . .
 EXPOSE 3000
 
 USER nodejs
 
-CMD ["node", ".output/server/index.mjs"]
+CMD ["node", "app/.output/server/index.mjs"]
