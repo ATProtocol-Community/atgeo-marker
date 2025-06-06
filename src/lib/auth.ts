@@ -27,6 +27,7 @@ class StateStore implements NodeSavedStateStore {
     return JSON.parse(stateByKey.state) as NodeSavedState;
   }
   async set(key: string, val: NodeSavedState) {
+    console.log("auth state key", key);
     await db
       .insertInto("bsky_auth_state")
       .values({
@@ -54,6 +55,7 @@ class SessionStore implements NodeSavedSessionStore {
     return JSON.parse(sessionByKey.session) as NodeSavedSession;
   }
   async set(key: string, val: NodeSavedSession) {
+    console.log("auth session key", key);
     await db
       .insertInto("bsky_auth_sessions")
       .values({
@@ -111,15 +113,9 @@ const createClient = async () => {
 
 export const oauthClient = await createClient();
 
-// TODO: incredible HACK, DO NOT PUT THIS IN PRODUCTION
-let LOGGED_IN_AGENT: Agent | null = null;
-export const getLoggedInBskyAgent = async (
+export const getLoggedInAppBskyAgent = async (
   user: { handle: string } | { did: string }
 ) => {
-  if (LOGGED_IN_AGENT && LOGGED_IN_AGENT.assertAuthenticated()) {
-    return LOGGED_IN_AGENT;
-  }
-
   const did =
     "did" in user
       ? user.did
@@ -142,7 +138,6 @@ export const getLoggedInBskyAgent = async (
       return agent;
     }
   } catch (e) {
-    LOGGED_IN_AGENT = null;
     if (e instanceof TokenRefreshError) {
       // Token refresh failed, so we need to login again
       return null;
@@ -177,12 +172,13 @@ export const getLoggedInMarkerAgent = async (user: { handle: string }) => {
   return markerAgent;
 };
 
-export async function loginToBsky({ user }: { user: string }) {
+export async function loginToPds({ user }: { user: string }) {
   const did = await oauthClient.handleResolver.resolve(user);
   if (!did) {
     throw new Error(`Failed to resolve handle for user ${user}`);
   }
 
+  // TODO: double check if this needs to be cryptographically secure
   const state = nanoid();
   const url = await oauthClient.authorize(did, {
     scope: "atproto transition:generic",
@@ -192,7 +188,6 @@ export async function loginToBsky({ user }: { user: string }) {
   return url.href;
 }
 
-export async function logoutFromBsky({ did }: { did: string }) {
+export async function logoutFromPds({ did }: { did: string }) {
   await oauthClient.revoke(did);
-  LOGGED_IN_AGENT = null;
 }
