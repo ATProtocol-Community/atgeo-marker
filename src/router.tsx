@@ -11,9 +11,7 @@ export function createRouter() {
       user: null,
     },
     defaultErrorComponent: ({ error }) => (
-      <main className="flex h-screen flex-col items-center justify-center gap-4">
-        <div className="text-red-500">Error: {error.message}</div>
-      </main>
+      <div className="text-red-500">Error: {error.message}</div>
     ),
   });
 

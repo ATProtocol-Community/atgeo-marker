@@ -34,7 +34,7 @@ export function Autocomplete<T extends { label: string }>(props: {
         <Command>
           <PopoverAnchor asChild>
             <CommandInput
-              className="bg-none outline-0 focus-visible::outline-0 border-0"
+              className="bg-none outline-0 focus-visible::outline-0 border-0 !bg-gray-600"
               asChild
               value={search}
               onValueChange={async (input) => {
@@ -61,7 +61,7 @@ export function Autocomplete<T extends { label: string }>(props: {
                 }
               }}
             >
-              <Input placeholder="Select location..." className="w-full" />
+              <Input placeholder="Select location..." className="w-full " />
             </CommandInput>
           </PopoverAnchor>
           {!open && <CommandList aria-hidden="true" className="hidden" />}

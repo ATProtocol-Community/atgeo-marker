@@ -11,7 +11,6 @@ import { useState } from "react";
 import { match, P } from "ts-pattern";
 
 import { fieldContext, useFieldContext, formContext } from "./LocationForm";
-import { createFormHook } from "@tanstack/react-form";
 
 const sleep = (seconds: number) =>
   new Promise((res) => setTimeout(res, seconds * 1000));
@@ -226,16 +225,12 @@ export const LocationSearch = (props: {
           <FsqLexiconForm {...fsq} prefix={props.prefix} />
         ))
         .with(P.nullish, () => null)
+        // TODO: this is for addresses that do not have the $type field
+        // We should not be able to get here.
+        .with(P.any, () => {
+          throw new Error("Invalid location");
+        })
         .exhaustive()}
     </>
   );
 };
-
-export const { useAppForm, withForm } = createFormHook({
-  fieldContext,
-  formContext,
-  fieldComponents: {
-    LocationSearch,
-  },
-  formComponents: {},
-});

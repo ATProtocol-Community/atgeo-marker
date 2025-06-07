@@ -93,7 +93,7 @@ export const FsqLexiconForm = () => {
   );
 };
 
-export const { useAppForm, withForm } = createFormHook({
+const formHook = createFormHook({
   fieldContext,
   formContext,
   fieldComponents: {
@@ -103,6 +103,9 @@ export const { useAppForm, withForm } = createFormHook({
   },
   formComponents: {},
 });
+
+export const useAppForm = formHook.useAppForm;
+export const withForm = formHook.withForm;
 
 export const AddressSubform = withForm({
   defaultValues: {

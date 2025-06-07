@@ -33,7 +33,7 @@ export default function Header({ user }: { user: User | null }) {
   let pathname = location.pathname;
 
   return (
-    <div className="container max-w-screen w-full sticky top-10 items-center flex justify-center h-0 z-10">
+    <div className="container max-w-screen w-full sticky top-4 items-center flex justify-center z-10">
       <div className="backdrop-blur-xl lg:max-w-5xl w-full border border-stone-800/90 overflow-hidden rounded-full z-100 bg-background/50 shadow-inner shadow-stone-200 dark:shadow-stone-800 *:transition-colors mx-2">
         <div className="flex items-center justify-between w-full p-[0.4rem] noisey rounded-full z-10">
           <nav className="flex relative justify-start w-full z-100 rounded-full">

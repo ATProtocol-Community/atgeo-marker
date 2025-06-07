@@ -36,7 +36,7 @@ const getMarkersForHandle = createServerFn({ method: "GET" })
     } catch (error) {
       if (error instanceof InvalidRequestError) {
         console.error(
-          "Invalid request proxy",
+          "Invalid request proxy!",
           markerAgent.headers.get("atproto-proxy")
         );
       }
@@ -77,18 +77,19 @@ function Home() {
   }
 
   return (
-    <main className="flex h-screen flex-col items-center justify-center gap-4">
-      <div>Hello {user.handle}</div>
-      <div>Make a Marker</div>
+    <>
+      <h2 className="text-2xl font-bold pt-4">Make a Marker</h2>
       <MarkerForm
         onNewMarker={(response) => {
           setMarkers((prev) => [...prev, response]);
         }}
       />
       <div>You have made these markers:</div>
-      {markers.map((marker) => (
-        <MarkerChip key={marker.uri} marker={marker} />
-      ))}
-    </main>
+      <div className="max-w-4xl w-full grid grid-cols-3 gap-2">
+        {markers.map((marker) => (
+          <MarkerChip key={marker.uri} marker={marker} />
+        ))}
+      </div>
+    </>
   );
 }

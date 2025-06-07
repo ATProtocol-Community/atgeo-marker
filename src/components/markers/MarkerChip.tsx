@@ -10,6 +10,8 @@ import { isMain as isAddress } from "~/generated/server/types/community/lexicon/
 import { isMain as isGeo } from "~/generated/server/types/community/lexicon/location/geo";
 import { isMain as isFsq } from "~/generated/server/types/community/lexicon/location/fsq";
 import { isMain as isHthree } from "~/generated/server/types/community/lexicon/location/hthree";
+import { LandPlot, MapPinned } from "lucide-react";
+import clsx from "clsx";
 
 const AddressChip = ({
   marker,
@@ -19,11 +21,15 @@ const AddressChip = ({
   location: CommunityLexiconLocationAddress.Main;
 }) => {
   return (
-    <div>
-      <a href={`https://pdsls.dev/${marker.uri}`}>
-        📍 {location.country} {!!marker.label && `— ${marker.label}`}
-      </a>
-    </div>
+    <>
+      <MapPinned className="w-4 h-4" />
+      <div>
+        {location.street} {location.country}
+        {!!marker.label && (
+          <div className="text-sm flex text-gray-400">{marker.label}</div>
+        )}
+      </div>
+    </>
   );
 };
 
@@ -44,7 +50,19 @@ const FsqChip = ({
   marker: MarkerView;
   location: CommunityLexiconLocationFsq.Main;
 }) => {
-  return <div>FsqChip</div>;
+  return (
+    <>
+      <LandPlot className="w-4 h-4" />
+      <div>
+        <div>{location.name}</div>
+        {!!marker.label && (
+          <div className="text-sm flex text-gray-400 items-center gap-1 max-w-full">
+            {marker.label}
+          </div>
+        )}
+      </div>
+    </>
+  );
 };
 
 const HthreeChip = ({
@@ -59,7 +77,10 @@ const HthreeChip = ({
 
 export const MarkerChip = ({ marker }: { marker: MarkerView }) => {
   return (
-    <div>
+    <a
+      href={`https://pdsls.dev/${marker.uri}`}
+      className="max-w-[300px] rounded bg-primary/40 p-2 flex items-center gap-2 border-2 border-blue-600 hover:bg-primary/80"
+    >
       {match(marker.location)
         .when(isAddress<MarkerView["location"]>, (location) => (
           <AddressChip marker={marker} location={location} />
@@ -77,6 +98,6 @@ export const MarkerChip = ({ marker }: { marker: MarkerView }) => {
           <div>Unknown location type: {location.$type}</div>
         ))
         .exhaustive()}
-    </div>
+    </a>
   );
 };

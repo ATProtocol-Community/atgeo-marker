@@ -59,8 +59,10 @@ function RootDocument({ children }: React.PropsWithChildren) {
       </head>
       <body>
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
-          <Header user={user} />
-          {children}
+          <main className="flex min-h-screen flex-col items-center justify-center gap-4">
+            <Header user={user} />
+            {children}
+          </main>
         </ThemeProvider>
         <Scripts />
       </body>

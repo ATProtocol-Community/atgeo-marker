@@ -4,7 +4,7 @@ export async function up(db: Kysely<any>): Promise<void> {
   await db.schema
     .createTable("bsky_auth_sessions")
     .addColumn("key", "text", (col) => col.primaryKey().notNull().unique())
-    .addColumn("session", "text", (col) => col.notNull().notNull())
+    .addColumn("session", "text", (col) => col.notNull())
     .addColumn("created_at", "text", (col) =>
       col.notNull().defaultTo(sql`CURRENT_TIMESTAMP`)
     )

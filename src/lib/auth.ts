@@ -62,6 +62,7 @@ class SessionStore implements NodeSavedSessionStore {
         key,
         session: JSON.stringify(val),
       })
+      .onConflict((oc) => oc.doUpdateSet({ session: JSON.stringify(val) }))
       .execute();
   }
   async del(key: string) {

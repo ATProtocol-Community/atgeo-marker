@@ -19,7 +19,8 @@ import {
   Main as AddressMain,
 } from "~/generated/server/types/community/lexicon/location/address";
 import { toAtUri } from "~/lib/uris";
-import { LocationSearch, useAppForm } from "./LocationSearch";
+import { LocationSearch } from "./LocationSearch";
+import { useAppForm, fieldContext } from "./LocationForm";
 import { CommunityLexiconLocationAddress } from "~/generated/api";
 import { CommunityLexiconLocationHthree } from "~/generated/api";
 import { CommunityLexiconLocationFsq } from "~/generated/api";
@@ -190,9 +191,13 @@ export function MarkerForm(props: {
           )}
         </form.Field>
         <div>Choose a location</div>
-        <form.AppField name="location">
-          {(field) => <field.LocationSearch prefix={field.name} />}
-        </form.AppField>
+        <form.Field name="location">
+          {(field) => (
+            <fieldContext.Provider value={field}>
+              <LocationSearch prefix={field.name} />
+            </fieldContext.Provider>
+          )}
+        </form.Field>
         <form.Field name="markedEntries" mode="array">
           {(field) => (
             <div className="flex flex-col  gap-2">

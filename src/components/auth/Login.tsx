@@ -83,22 +83,20 @@ const loginUser = createServerFn({ method: "POST" })
 export function Login({ defaultHandle }: { defaultHandle?: string }) {
   const { pending } = useFormStatus();
   return (
-    <main className="flex h-screen flex-col items-center justify-center w-full">
-      <form
-        className="flex flex-col w-md mx-auto gap-2"
-        action={loginUser.url}
-        method="POST"
-        encType="multipart/form-data"
-      >
-        <Input
-          type="text"
-          placeholder="gustophergoose.bsky.social"
-          name="handle"
-          defaultValue={defaultHandle}
-          disabled={pending}
-        />
-        <Button disabled={pending}>Login with ATproto</Button>
-      </form>
-    </main>
+    <form
+      className="flex flex-col w-md mx-auto gap-2"
+      action={loginUser.url}
+      method="POST"
+      encType="multipart/form-data"
+    >
+      <Input
+        type="text"
+        placeholder="gustophergoose.bsky.social"
+        name="handle"
+        defaultValue={defaultHandle}
+        disabled={pending}
+      />
+      <Button disabled={pending}>Login with ATproto</Button>
+    </form>
   );
 }
