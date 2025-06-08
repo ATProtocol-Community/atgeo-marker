@@ -33,8 +33,7 @@ CMD ["sh", "-c", "npx kysely-ctl migrate:latest"]
 RUN addgroup --system --gid 1001 nodejs && \
     adduser --system --uid 1001 nodejs && \
     mkdir -p /app/data && \
-    chown -R nodejs:nodejs /data && \
-    chmod 755 /data
+    chown -R nodejs:nodejs /data
 
 COPY --from=builder /app .
 
