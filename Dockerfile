@@ -21,6 +21,7 @@ RUN mkdir -p ./generated && \
 
 
 RUN pnpm build
+RUN pnpx kysely-ctl migrate:latest
 
 # Runner stage
 FROM node:22-slim AS runner
