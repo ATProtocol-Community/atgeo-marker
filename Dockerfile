@@ -24,7 +24,7 @@ RUN pnpm build
 RUN pnpx kysely-ctl migrate:latest
 
 # Runner stage
-FROM node:22-slim AS runner
+FROM node:24-slim AS runner
 WORKDIR /app
 
 ENV NODE_ENV=production
