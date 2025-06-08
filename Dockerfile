@@ -4,6 +4,7 @@ FROM base AS builder
 WORKDIR /app
 
 COPY package.json pnpm-lock.yaml* ./
+COPY patches/ ./patches/
 
 RUN npm install -g pnpm && \
     apt-get update && \
