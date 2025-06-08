@@ -46,7 +46,7 @@
         },
         "record": {
           "type": "union",
-          "refs": ["app.bsky.feed.post", "com.whtwnd.blog.entry"],
+          "refs": ["app.bsky.feed.post#record", "com.whtwnd.blog.entry#record"],
           "description": "NOT WORKING!! The hydrated record associated with this entry. Since this is a open union, it is possible that the record is of a type other than the ones listed."
         }
       }

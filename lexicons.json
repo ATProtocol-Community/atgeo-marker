@@ -4,6 +4,7 @@
     "community.lexicon.location.geo",
     "community.lexicon.location.fsq",
     "community.lexicon.location.address",
-    "app.bsky.feed.post"
+    "app.bsky.feed.post",
+    "com.whtwnd.blog.entry"
   ]
 }

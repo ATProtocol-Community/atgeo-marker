@@ -1,0 +1,26 @@
+{
+  "include": ["**/*.ts", "**/*.tsx"],
+  "exclude": ["node_modules/**", "dist/**", "../generated/**"],
+  "compilerOptions": {
+    "strict": true,
+    "esModuleInterop": true,
+    "jsx": "react-jsx",
+    "module": "CommonJS",
+    "moduleResolution": "Node",
+    "lib": ["DOM", "DOM.Iterable", "ES2022"],
+    "isolatedModules": true,
+    "resolveJsonModule": true,
+    "skipLibCheck": true,
+    "target": "ES2022",
+    "allowJs": true,
+    "forceConsistentCasingInFileNames": true,
+    "baseUrl": ".",
+    "outDir": "dist",
+    "types": ["urlpattern-polyfill"],
+    "paths": {
+      "~/*": ["./src/*"],
+      "~/lexicons/*": ["../lexicons/*"],
+      "~/generated/*": ["../generated/*"]
+    }
+  }
+}

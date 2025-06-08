@@ -3,17 +3,23 @@
   "version": "0.0.1",
   "description": "",
   "main": "index.js",
-  "type": "module",
   "scripts": {
-    "dev": "tsx watch src/index.ts"
+    "dev": "tsx watch src/index.ts",
+    "build": "rm -rf dist && tsc --outDir dist && tsc-alias -p ./tsconfig.json",
+    "start": "node dist/appview/src/index.js"
   },
   "keywords": [],
   "author": "",
   "license": "MIT",
   "dependencies": {
+    "@atproto/api": "^0.14.20",
+    "@atproto/lexicon": "^0.4.10",
     "@atproto/xrpc-server": "^0.7.17",
+    "@total-typescript/ts-reset": "^0.6.1",
     "dotenv": "^16.5.0",
-    "express": "^5.1.0"
+    "express": "^5.1.0",
+    "multiformats": "^13.3.6",
+    "typescript": "^5.8.3"
   },
   "devDependencies": {
     "@types/express": "^5.0.1",

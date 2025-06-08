@@ -1,7 +1,7 @@
 import "@total-typescript/ts-reset";
 
 import express from "express";
-import { createServer } from "generated/server";
+import { createServer } from "~/generated/server";
 import { getDidManifest } from "./did";
 import dotenv from "dotenv";
 import { Agent, AtUri } from "@atproto/api";
@@ -66,6 +66,7 @@ server.community.atprotocol.geomarker.getMarkers({
     await Promise.all(
       allEntryUris.map(async (entryUri) => {
         const view = await fetchEntryView({ entryUri: new AtUri(entryUri) });
+        // @ts-expect-error - TODO: fix this
         atUriToView.set(entryUri, view);
         return view;
       })

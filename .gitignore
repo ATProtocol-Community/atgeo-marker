@@ -6,3 +6,4 @@ node_modules
 generated/
 private_key.pem
 db.sqlite
+dist/
