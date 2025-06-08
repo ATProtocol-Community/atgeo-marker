@@ -28,17 +28,8 @@ WORKDIR /app
 
 ENV NODE_ENV=production
 
-CMD ["sh", "-c", "npx kysely-ctl migrate:latest"]
-
-RUN addgroup --system --gid 1001 nodejs && \
-    adduser --system --uid 1001 nodejs && \
-    mkdir -p /app/data && \
-    chown -R nodejs:nodejs /data
-
 COPY --from=builder /app .
 
 EXPOSE 3000
-
-USER nodejs
 
 CMD ["sh", "-c", "npx kysely-ctl migrate:latest && node .output/server/index.mjs"]
