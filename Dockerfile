@@ -21,13 +21,14 @@ RUN mkdir -p ./generated && \
 
 
 RUN pnpm build
-RUN pnpx kysely-ctl migrate:latest
 
 # Runner stage
 FROM node:24-slim AS runner
 WORKDIR /app
 
 ENV NODE_ENV=production
+
+CMD ["sh", "-c", "npx kysely-ctl migrate:latest"]
 
 RUN addgroup --system --gid 1001 nodejs && \
     adduser --system --uid 1001 nodejs && \
