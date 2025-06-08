@@ -41,4 +41,4 @@ EXPOSE 3000
 
 USER nodejs
 
-CMD ["node", ".output/server/index.mjs"]
+CMD ["sh", "-c", "npx kysely-ctl migrate:latest && node .output/server/index.mjs"]
