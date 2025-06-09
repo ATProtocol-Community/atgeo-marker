@@ -70,10 +70,12 @@ class SessionStore implements NodeSavedSessionStore {
   }
 }
 
-// We're running this local only for now, so we can use localhost
-// Note: you must use the default port for this to work, so we
+const IS_DEVELOPMENT = process.env.NODE_ENV == "development";
+
+// Note: on local you must use the default port for this to work, so we
 // cannot run a dev server on one of the usual ports
-const PUBLIC_URL = "http://127.0.0.1/";
+const PUBLIC_URL =
+  process.env.PUBLIC_URL || (IS_DEVELOPMENT ? "http://127.0.0.1/" : undefined);
 const ALLOWED_SCOPES = "atproto transition:generic";
 const REDIRECT_PATH = "/api/auth/callback";
 
@@ -87,7 +89,9 @@ const LOCAL_SEARCH_PARAMS = new URLSearchParams({
 
 export const CLIENT_METADATA = {
   client_name: "ATgeo Marker",
-  client_id: `http://localhost?${LOCAL_SEARCH_PARAMS.toString()}`,
+  client_id: IS_DEVELOPMENT
+    ? `http://localhost?${LOCAL_SEARCH_PARAMS.toString()}`
+    : new URL("/api/client-metadata", PUBLIC_URL).toString(),
   client_uri: PUBLIC_URL,
   redirect_uris: [new URL(REDIRECT_PATH, PUBLIC_URL).toString()],
   scope: ALLOWED_SCOPES,
@@ -96,8 +100,10 @@ export const CLIENT_METADATA = {
   application_type: "web",
   token_endpoint_auth_method: "none",
   dpop_bound_access_tokens: true,
-  jwks_uri: new URL("/jwks.json", PUBLIC_URL).toString(),
+  jwks_uri: new URL("/api/jwks", PUBLIC_URL).toString(),
 } satisfies NodeOAuthClientOptions["clientMetadata"];
+
+export const JWK = await JoseKey.generate();
 
 const createClient = async () => {
   if (!PUBLIC_URL) {
@@ -106,7 +112,7 @@ const createClient = async () => {
 
   return new NodeOAuthClient({
     clientMetadata: CLIENT_METADATA,
-    keyset: await Promise.all([JoseKey.generate()]),
+    keyset: [JWK],
     stateStore: new StateStore(),
     sessionStore: new SessionStore(),
   });
