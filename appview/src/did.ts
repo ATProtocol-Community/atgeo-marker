@@ -1,6 +1,7 @@
 import { readFileSync } from "fs";
 
-const pubKey = readFileSync("./public_key.pem", "utf-8");
+const pubKey =
+  process.env.PUBLIC_KEY ?? readFileSync("./public_key.pem", "utf-8");
 
 export const getDidManifest = ({
   did,
