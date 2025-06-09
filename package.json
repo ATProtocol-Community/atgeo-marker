@@ -70,7 +70,6 @@
     "@vitejs/plugin-react": "^4.3.4",
     "kysely-codegen": "^0.18.5",
     "kysely-ctl": "^0.13.0",
-    "tsc-alias": "^1.8.16",
     "vite-tsconfig-paths": "^5.1.4"
   },
   "pnpm": {
