@@ -33,6 +33,11 @@
               "community.lexicon.location.hthree"
             ],
             "description": "The location of the geographic marker. Could be an address, a geo coordinate, a foursquare venue, or a hThree venue."
+          },
+          "locationSource": {
+            "type": "string",
+            "format": "at-uri",
+            "description": "An AtUri that points to the record the location was extracted from, or to the service providing the location."
           }
         }
       }

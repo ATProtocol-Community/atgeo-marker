@@ -27,6 +27,11 @@
           ],
           "description": "The location of the geographic marker. Could be an address, a geo coordinate, a foursquare venue, or a hThree venue."
         },
+        "locationSource": {
+          "type": "ref",
+          "ref": "#locationServiceView",
+          "description": "An AtUri that points to the record the location was extracted from, or to the service providing the location."
+        },
         "markedEntries": {
           "type": "array",
           "items": {
@@ -47,7 +52,38 @@
         "record": {
           "type": "union",
           "refs": ["app.bsky.feed.post#record", "com.whtwnd.blog.entry#record"],
-          "description": "NOT WORKING!! The hydrated record associated with this entry. Since this is a open union, it is possible that the record is of a type other than the ones listed."
+          "description": "The hydrated record associated with this entry. Since this is a open union, it is possible that the record is of a type other than the ones listed."
+        }
+      }
+    },
+    "locationServiceView": {
+      "type": "object",
+      "required": ["originalUri"],
+      "properties": {
+        "uri": {
+          "type": "string",
+          "format": "at-uri"
+        },
+        "name": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 800,
+          "maxGraphemes": 400,
+          "description": "The name of the location service."
+        },
+        "icon": {
+          "type": "string",
+          "format": "uri",
+          "description": "The icon of the location service."
+        },
+        "description": {
+          "type": "string",
+          "description": "The description of the location service."
+        },
+        "originalUri": {
+          "type": "string",
+          "format": "at-uri",
+          "description": "The original AtUri this location service was extracted from."
         }
       }
     }
