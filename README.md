@@ -41,8 +41,11 @@ pnpm env use latest
 
 ### Running the AppView
 
-5. Add `MARKER_APPVIEW_DID` to your `.env` file. It should be of the form `did:web:a-reachable-url.com`
-6. Run `pnpm run dev`
+5. In the top level folder of the project, run `pnpm run db:migrate`.
+6. In the top level folder of the project, create a `.env` file.
+7. Add `MARKER_APPVIEW_DID` to your `.env` file. It should be of the form `did:web:a-reachable-url.com`.
+   NOTE: this URL needs to be reachable from the web! You might want to use a [local tunnel for this, like `tailscale serve/funnel` or `ngrok`](https://tailscale.com/learn/ngrok-alternatives#5-ngrok-alternatives-market-overview-and-options).
+8. Enter the `appview/` directory, and run `pnpm run dev`
 
 ## Where to Go
 
