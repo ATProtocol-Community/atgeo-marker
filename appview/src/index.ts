@@ -6,7 +6,10 @@ import { getDidManifest } from "./did";
 import dotenv from "dotenv";
 import { Agent, AtUri } from "@atproto/api";
 import { fetchEntryView } from "./lib/entries";
-import { extractValidMarkerRecord } from "./lib/markers";
+import {
+  extractValidMarkerRecord,
+  makeLocationSourceView,
+} from "./lib/markers";
 import { EntryView } from "~/generated/server/types/community/atprotocol/geomarker/defs";
 
 // Load .env file from both the current directory and parent directory
@@ -78,6 +81,7 @@ server.community.atprotocol.geomarker.getMarkers({
         markers: validMarkerRecords.map((marker) => ({
           ...marker,
           $type: "community.atprotocol.geomarker.defs#markerView",
+          locationSource: makeLocationSourceView(marker.locationSource),
           markedEntries: marker
             .markedEntries!.map((entryUri) => atUriToView.get(entryUri))
             .filter(Boolean),

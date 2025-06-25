@@ -83,6 +83,7 @@ function Home() {
         onNewMarker={(response) => {
           setMarkers((prev) => [...prev, response]);
         }}
+        userDid={user.did}
       />
       <div>You have made these markers:</div>
       <div className="max-w-4xl w-full grid grid-cols-3 gap-2">

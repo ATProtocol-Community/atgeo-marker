@@ -19,7 +19,7 @@ import {
   Main as AddressMain,
 } from "~/generated/server/types/community/lexicon/location/address";
 import { toAtUri } from "~/lib/uris";
-import { LocationSearch } from "./LocationSearch";
+import { GazeteerLocation, LocationSearch } from "./LocationSearch";
 import { useAppForm, fieldContext } from "./LocationForm";
 import { CommunityLexiconLocationAddress } from "~/generated/api";
 import { CommunityLexiconLocationHthree } from "~/generated/api";
@@ -45,7 +45,7 @@ const isAddress = (location: unknown): location is AddressMain => {
 type MarkerFormData = {
   label: string;
   markedEntries: string[];
-  location: CommunityLexiconLocationAddress.Main | CommunityLexiconLocationHthree.Main | CommunityLexiconLocationFsq.Main | undefined;
+  location: Pick<GazeteerLocation, "location" | "sourceUri"> | undefined;
 }
 
 const postMarker = createServerFn({ method: "POST" })
@@ -56,10 +56,11 @@ const postMarker = createServerFn({ method: "POST" })
         | MarkerFormData
     ) => {
       const submittedData =
-        data instanceof FormData ? Object.fromEntries(data.entries()) : data;
+        data instanceof FormData ? Object.fromEntries(data.entries()) as unknown as MarkerFormData : data ;
       const parsed = schemaMap.defs.main.record.safeParse({
         label: submittedData.label || undefined,
-        location: submittedData.location,
+        location: submittedData.location?.location,
+        locationSource: submittedData.location?.sourceUri,
         markedEntries: submittedData.markedEntries,
       }) as SafeParseReturnType<unknown, MarkerRecord>;
 
@@ -75,6 +76,7 @@ const postMarker = createServerFn({ method: "POST" })
       return {
         label: parsed.data.label,
         location: parsed.data.location,
+        locationSource: parsed.data.locationSource,
         markedEntries: parsed.data.markedEntries,
       };
     }
@@ -110,6 +112,7 @@ const postMarker = createServerFn({ method: "POST" })
         {
           label: data.label as string,
           location: data.location,
+          locationSource: data.locationSource,
           markedEntries: markedAtUris,
         }
       );
@@ -128,6 +131,7 @@ const postMarker = createServerFn({ method: "POST" })
 export function MarkerForm(props: {
   className?: string;
   onNewMarker: (response: MarkerView) => void;
+  userDid: string;
 }) {
   const form = useAppForm({
     defaultValues: {
@@ -194,7 +198,7 @@ export function MarkerForm(props: {
         <form.Field name="location">
           {(field) => (
             <fieldContext.Provider value={field}>
-              <LocationSearch prefix={field.name} />
+              <LocationSearch prefix={field.name} userDid={props.userDid} />
             </fieldContext.Provider>
           )}
         </form.Field>

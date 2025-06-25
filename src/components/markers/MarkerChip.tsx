@@ -10,7 +10,7 @@ import { isMain as isAddress } from "~/generated/server/types/community/lexicon/
 import { isMain as isGeo } from "~/generated/server/types/community/lexicon/location/geo";
 import { isMain as isFsq } from "~/generated/server/types/community/lexicon/location/fsq";
 import { isMain as isHthree } from "~/generated/server/types/community/lexicon/location/hthree";
-import { LandPlot, MapPinned } from "lucide-react";
+import { LandPlot, MapPinned, Pyramid } from "lucide-react";
 import clsx from "clsx";
 
 const AddressChip = ({
@@ -27,6 +27,11 @@ const AddressChip = ({
         {location.street} {location.country}
         {!!marker.label && (
           <div className="text-sm flex text-gray-400">{marker.label}</div>
+        )}
+        {!!marker.locationSource && (
+          <div className="text-sm flex text-gray-400">
+            {marker.locationSource?.name}
+          </div>
         )}
       </div>
     </>
@@ -60,6 +65,11 @@ const FsqChip = ({
             {marker.label}
           </div>
         )}
+        {!!marker.locationSource && (
+          <div className="text-sm flex text-gray-400">
+            {marker.locationSource?.name}
+          </div>
+        )}
       </div>
     </>
   );
@@ -72,7 +82,24 @@ const HthreeChip = ({
   marker: MarkerView;
   location: CommunityLexiconLocationHthree.Main;
 }) => {
-  return <div>HthreeChip</div>;
+  return (
+    <>
+      <Pyramid className="w-4 h-4" />
+      <div>
+        <div>{location.name}</div>
+        {!!marker.label && (
+          <div className="text-sm flex text-gray-400 items-center gap-1 max-w-full">
+            {marker.label}
+          </div>
+        )}
+        {!!marker.locationSource && (
+          <div className="text-sm flex text-gray-400">
+            {marker.locationSource?.name}
+          </div>
+        )}
+      </div>
+    </>
+  );
 };
 
 export const MarkerChip = ({ marker }: { marker: MarkerView }) => {

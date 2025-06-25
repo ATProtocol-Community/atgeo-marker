@@ -20,7 +20,7 @@ import {
 const sleep = (seconds: number) =>
   new Promise((res) => setTimeout(res, seconds * 1000));
 
-interface GazeteerLocation {
+export interface GazeteerLocation {
   source: string;
   label: string;
   sourceUri?: string;
@@ -46,7 +46,8 @@ const LOCATIONS: GazeteerLocation[] = [
   {
     source: "4Square Places",
     label: "Lit Event Venue @ 1000 Cool Location Avenue, Awesome City",
-    sourceUri: "at://FSQ_PROVIDED_DID/com.foursquare.places/fsqid_123456789",
+    sourceUri:
+      "at://did:web:fakesquare.com/com.foursquare.places/fsqid_123456789",
     location: {
       $type: "community.lexicon.location.fsq",
       name: "Lit Event Venue",
@@ -60,7 +61,8 @@ const LOCATIONS: GazeteerLocation[] = [
     source: "Hip Events in Your Area",
     label:
       "Eras Tour (May 2894) — Lit Event Venue @ 1000 Cool Location Avenue, Awesome City",
-    sourceUri: "at://HIP_EVENTS_DID/events.hipmaps.tours/specific-tour-key",
+    sourceUri:
+      "at://did:web:fakeevents.com/events.hipmaps.tours/specific-tour-key",
     location: {
       $type: "community.lexicon.location.fsq",
       name: "Lit Event Venue",
@@ -83,9 +85,13 @@ const LOCATIONS: GazeteerLocation[] = [
   },
 ];
 
-const loadData = async (addressQuery: string) => {
+const loadData = async (addressQuery: string, userDid: string) => {
   await sleep(0.5);
-  return LOCATIONS;
+  return LOCATIONS.map((location) => ({
+    ...location,
+    // We need to replace the USER_DID with the current user's DID
+    sourceUri: location.sourceUri?.replace("USER_DID", userDid),
+  }));
 };
 
 const LocationItem = (props: GazeteerLocation) => {
@@ -100,40 +106,37 @@ const LocationItem = (props: GazeteerLocation) => {
 };
 
 export const LocationSearch = (props: {
-  onSelectLocation?: (
-    location:
-      | CommunityLexiconLocationHthree.Main
-      | CommunityLexiconLocationFsq.Main
-      | CommunityLexiconLocationAddress.Main
-      | undefined
-  ) => void;
+  onSelectLocation?: (location: GazeteerLocation | undefined) => void;
   prefix: string;
+  userDid: string;
 }) => {
-  const field = useFieldContext<
-    | CommunityLexiconLocationHthree.Main
-    | CommunityLexiconLocationFsq.Main
-    | CommunityLexiconLocationAddress.Main
-    | undefined
-  >();
-  const [location, setLocation] = useState<
-    | CommunityLexiconLocationHthree.Main
-    | CommunityLexiconLocationFsq.Main
-    | CommunityLexiconLocationAddress.Main
-    | undefined
-  >(field.state.value);
+  const field = useFieldContext<GazeteerLocation | undefined>();
+  const [location, setLocation] = useState<GazeteerLocation | undefined>(
+    field.state.value
+  );
 
   return (
     <>
       <Autocomplete
         renderItem={LocationItem}
-        loadOptions={loadData}
+        loadOptions={(addressQuery) => loadData(addressQuery, props.userDid)}
         onSelect={(item) => {
-          setLocation(item?.location);
-          props.onSelectLocation?.(item?.location);
-          field.handleChange(item?.location);
+          setLocation(item);
+          props.onSelectLocation?.(item);
+
+          field.handleChange(item);
         }}
       />
-      {match(location)
+      {location && (
+        <Input
+          type="hidden"
+          name={`${field.name}.locationSource`}
+          value={location.sourceUri}
+        />
+      )}
+      {match(location?.location)
+        // This displays the form for the specific location within the larger location
+        // returned from the gazeteer.
         .with({ $type: "community.lexicon.location.address" }, () => (
           <AddressLexiconForm />
         ))
