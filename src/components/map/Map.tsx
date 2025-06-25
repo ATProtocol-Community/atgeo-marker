@@ -14,8 +14,6 @@ import {
 } from "react-map-gl/maplibre";
 
 import type {
-  Feature,
-  Point,
   GeoJSONSource,
   CircleLayerSpecification,
   SymbolLayerSpecification,
@@ -23,7 +21,6 @@ import type {
 import "maplibre-gl/dist/maplibre-gl.css";
 
 import { useTheme } from "~/lib/ThemeProvider";
-import { Club } from "lucide-react";
 
 // Define the Geomarker type based on the lexicon (specifically the geo location part)
 interface GeoLocation {
