@@ -10,7 +10,12 @@ import { Input } from "../ui/input";
 import { useState } from "react";
 import { match, P } from "ts-pattern";
 
-import { fieldContext, useFieldContext, formContext } from "./LocationForm";
+import {
+  useFieldContext,
+  AddressLexiconForm,
+  HthreeLexiconForm,
+  FsqLexiconForm,
+} from "./LocationForm";
 
 const sleep = (seconds: number) =>
   new Promise((res) => setTimeout(res, seconds * 1000));
@@ -94,92 +99,6 @@ const LocationItem = (props: GazeteerLocation) => {
   );
 };
 
-const AddressLexiconForm = (
-  props: CommunityLexiconLocationAddress.Main & { prefix: string }
-) => {
-  return (
-    <>
-      <Input
-        type="hidden"
-        name={`${props.prefix}.$type`}
-        value="community.lexicon.location.address"
-      />
-      <Input type="hidden" name={`${props.prefix}.name`} value={props.name} />
-      <Input
-        type="hidden"
-        name={`${props.prefix}.region`}
-        value={props.region}
-      />
-      <Input
-        type="hidden"
-        name={`${props.prefix}.street`}
-        value={props.street}
-      />
-      <Input
-        type="hidden"
-        name={`${props.prefix}.country`}
-        value={props.country}
-      />
-      <Input
-        type="hidden"
-        name={`${props.prefix}.locality`}
-        value={props.locality}
-      />
-      <Input
-        type="hidden"
-        name={`${props.prefix}.postalCode`}
-        value={props.postalCode}
-      />
-    </>
-  );
-};
-
-const HthreeLexiconForm = (
-  props: CommunityLexiconLocationHthree.Main & { prefix: string }
-) => {
-  return (
-    <>
-      <Input
-        type="hidden"
-        name={`${props.prefix}.$type`}
-        value="community.lexicon.location.hthree"
-      />
-      <Input type="hidden" name={`${props.prefix}.name`} value={props.name} />
-      <Input type="hidden" name={`${props.prefix}.value`} value={props.value} />
-    </>
-  );
-};
-
-const FsqLexiconForm = (
-  props: CommunityLexiconLocationFsq.Main & { prefix: string }
-) => {
-  return (
-    <>
-      <Input
-        type="hidden"
-        name={`${props.prefix}.$type`}
-        value="community.lexicon.location.fsq"
-      />
-      <Input type="hidden" name={`${props.prefix}.name`} value={props.name} />
-      <Input
-        type="hidden"
-        name={`${props.prefix}.latitude`}
-        value={props.latitude}
-      />
-      <Input
-        type="hidden"
-        name={`${props.prefix}.longitude`}
-        value={props.longitude}
-      />
-      <Input
-        type="hidden"
-        name={`${props.prefix}.fsq_place_id`}
-        value={props.fsq_place_id}
-      />
-    </>
-  );
-};
-
 export const LocationSearch = (props: {
   onSelectLocation?: (
     location:
@@ -215,14 +134,14 @@ export const LocationSearch = (props: {
         }}
       />
       {match(location)
-        .with({ $type: "community.lexicon.location.address" }, (address) => (
-          <AddressLexiconForm {...address} prefix={props.prefix} />
+        .with({ $type: "community.lexicon.location.address" }, () => (
+          <AddressLexiconForm />
         ))
         .with({ $type: "community.lexicon.location.hthree" }, (hthree) => (
-          <HthreeLexiconForm {...hthree} prefix={props.prefix} />
+          <HthreeLexiconForm />
         ))
         .with({ $type: "community.lexicon.location.fsq" }, (fsq) => (
-          <FsqLexiconForm {...fsq} prefix={props.prefix} />
+          <FsqLexiconForm />
         ))
         .with(P.nullish, () => null)
         // TODO: this is for addresses that do not have the $type field
