@@ -30,22 +30,23 @@ pnpm env use latest
 
 ### Getting Ready
 
-0. Run `pnpm install`
 1. Run `pnpx @atproto/lex-cli gen-api ./generated/api ./lexicons/**/*.json` to generate the Lexicons client code
 2. Run `pnpx @atproto/lex-cli gen-server ./generated/server ./lexicons/**/*.json` to generate the Lexicons server code
 
 ### Running the client
 
-3. In the top level folder of the project, run `pnpm run db:migrate`.
-4. Run `pnpm dev`
-5. Go to `http://127.0.0.1/`
+3. Run `pnpm install`
+4. In the top level folder of the project, run `pnpm run db:migrate`.
+5. Run `pnpm dev`
+6. Go to `http://127.0.0.1/`
 
 ### Running the AppView
 
-6. In the top level folder of the project, create a `.env` file.
-7. Add `MARKER_APPVIEW_DID` to your `.env` file. It should be of the form `did:web:a-reachable-url.com`.
+7. In the top level folder of the project, create a `.env` file.
+8. Add `MARKER_APPVIEW_DID` to your `.env` file. It should be of the form `did:web:a-reachable-url.com`.
    NOTE: this URL needs to be reachable from the web! You might want to use a [local tunnel for this, like `tailscale serve/funnel` or `ngrok`](https://tailscale.com/learn/ngrok-alternatives#5-ngrok-alternatives-market-overview-and-options).
-8. Enter the `appview/` directory, and run `pnpm run dev`
+9. Enter the `appview/` directory, and run `pnpm install`
+10. From the `appview/` directory, run `pnpm run dev`
 
 ## Where to Go
 
