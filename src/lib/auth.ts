@@ -55,7 +55,6 @@ class SessionStore implements NodeSavedSessionStore {
     return JSON.parse(sessionByKey.session) as NodeSavedSession;
   }
   async set(key: string, val: NodeSavedSession) {
-    console.log("auth session key", key);
     await db
       .insertInto("bsky_auth_sessions")
       .values({

@@ -9,7 +9,7 @@ export const Route = createFileRoute("/map/")({
 
 function RouteComponent() {
   return (
-    <div className="flex h-screen flex-col items-center justify-center">
+    <div className="flex h-screen flex-col items-center justify-center w-screen">
       <Map geomarkers={exampleData as any} />
     </div>
   );

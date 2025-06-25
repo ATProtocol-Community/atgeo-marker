@@ -73,13 +73,11 @@
     "vite-tsconfig-paths": "^5.1.4"
   },
   "pnpm": {
-    "ignoredBuiltDependencies": [
-      "@parcel/watcher",
-      "esbuild"
-    ],
+    "ignoredBuiltDependencies": [],
     "onlyBuiltDependencies": [
       "@biomejs/biome",
       "@parcel/watcher",
+      "@tailwindcss/oxide",
       "better-sqlite3",
       "cbor-extract",
       "esbuild"
