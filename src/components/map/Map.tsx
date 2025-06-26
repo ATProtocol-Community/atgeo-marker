@@ -22,7 +22,7 @@ import "maplibre-gl/dist/maplibre-gl.css";
 
 import { useTheme } from "~/lib/ThemeProvider";
 
-// Define the Geomarker type based on the lexicon (specifically the geo location part)
+// Define the Geomarker type based on the "geo" lexicon only ("address", "hthree", "fsq" location types not defined here)
 interface GeoLocation {
   $type: "community.lexicon.location.geo";
   name?: string;
@@ -34,7 +34,7 @@ interface GeoLocation {
 interface Geomarker {
   label: string;
   location: GeoLocation; // Assuming only GeoLocation for now
-  markedEntries?: string[];
+  markedEntries?: string[]; // Initialize list of entries associated with this point
 }
 
 // Define properties for GeoJSON features derived from Geomarkers
@@ -105,7 +105,7 @@ interface MapProps {
   animateIn?: boolean;
 }
 
-export default function Map({ geomarkers, animateIn = true }: MapProps) {
+export default function Map({ geomarkers, animateIn = false }: MapProps) {
   const [popupInfo, setPopupInfo] = useState<PopupInfo | null>(null);
 
   const [viewState, setViewState] = useState<ViewState>({
@@ -244,8 +244,8 @@ export default function Map({ geomarkers, animateIn = true }: MapProps) {
 
   const mapStyle = useMemo(() => {
     return theme.theme === "dark"
-      ? "https://gist.githubusercontent.com/espeon/de168da3748c9462e1186203c78221a3/raw/8b1e888003839c2c4dbbd14de3213f31f1ea0643/darkmode.json"
-      : "https://tiles.openfreemap.org/styles/liberty";
+      ? "src/components/map/dark-matter.json"
+      : "src/components/map/positron.json";
   }, [theme.theme]);
 
   return (
@@ -295,7 +295,7 @@ export default function Map({ geomarkers, animateIn = true }: MapProps) {
           className="text-gray-800"
         >
           {/* Render the content here. For now, just the label. */}
-          {popupInfo.label}
+          { popupInfo.label }
           {/* You can replace the line above with a component rendering the post */}
           {/* e.g., <PostComponent markerLabel={popupInfo.label} /> */}
         </Popup>
