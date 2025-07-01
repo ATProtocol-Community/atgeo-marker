@@ -24,6 +24,7 @@ import { useAppForm, fieldContext } from "./LocationForm";
 import { CommunityLexiconLocationAddress } from "~/generated/api";
 import { CommunityLexiconLocationHthree } from "~/generated/api";
 import { CommunityLexiconLocationFsq } from "~/generated/api";
+import { CircleX, CrossIcon, DeleteIcon, PlusIcon } from "lucide-react";
 
 const lexiconDict = {
   [geomarkerLexicon.id]: geomarkerLexicon,
@@ -179,8 +180,16 @@ export function MarkerForm(props: {
         await form.handleSubmit();
       }}
     >
-      <div className="flex flex-col gap-2  bg-gray-800 px-2 py-4 rounded-md">
-        <div>Label your marker (optional)</div>
+      <div className="flex flex-col gap-2 dark:bg-gray-800 bg-white px-2 py-4 rounded-md">
+      <div className="text-black dark:text-white">Marker Location</div>
+        <form.Field name="location">
+          {(field) => (
+            <fieldContext.Provider value={field}>
+              <LocationSearch prefix={field.name} userDid={props.userDid} />
+            </fieldContext.Provider>
+          )}
+        </form.Field>
+        <div className="text-black dark:text-white">Marker Label (optional)</div>
         <form.Field name="label">
           {(field) => (
             <Input
@@ -190,29 +199,21 @@ export function MarkerForm(props: {
               disabled={isSubmitting}
               type="text"
               placeholder="Label"
-              className="!bg-gray-600"
+              className="dark:!bg-gray-600 !bg-gray-100 dark:text-white text-black"
             />
-          )}
-        </form.Field>
-        <div>Choose a location</div>
-        <form.Field name="location">
-          {(field) => (
-            <fieldContext.Provider value={field}>
-              <LocationSearch prefix={field.name} userDid={props.userDid} />
-            </fieldContext.Provider>
           )}
         </form.Field>
         <form.Field name="markedEntries" mode="array">
           {(field) => (
             <div className="flex flex-col  gap-2">
-              <div>Mark your entries! (optional)</div>
+              <div className="text-black dark:text-white">Marked AtUris (optional)</div>
               {field.state.value.map((value, index) => (
                 <div key={index} className="flex items-center gap-2 w-full">
                   <Input
-                    className="!bg-gray-600"
+                    className="dark:!bg-gray-600 !bg-gray-100 dark:text-white text-black"
                     disabled={isSubmitting}
                     type="text"
-                    placeholder="Marked Entry"
+                    placeholder="at://...."
                     name="markedEntries"
                     value={value}
                     onChange={(e) =>
@@ -226,9 +227,10 @@ export function MarkerForm(props: {
                   <Button
                     className="ml-auto"
                     type="button"
+                    variant="ghost"
                     onClick={() => field.removeValue(index)}
                   >
-                    🗑️
+                    <CircleX className="text-red-500" />
                   </Button>
                 </div>
               ))}
@@ -237,7 +239,7 @@ export function MarkerForm(props: {
                 type="button"
                 onClick={() => field.pushValue("")}
               >
-                ➕
+                <PlusIcon /> Add AtUri
               </Button>
             </div>
           )}

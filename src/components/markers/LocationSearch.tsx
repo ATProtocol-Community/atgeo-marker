@@ -97,8 +97,10 @@ const loadData = async (addressQuery: string, userDid: string) => {
 const LocationItem = (props: GazeteerLocation) => {
   return (
     <div className="flex flex-col items-start gap-0 max-w-full truncate">
-      <div className="text-nowrap max-w-full truncate">{props.label}</div>
-      <div className="text-sm flex text-gray-400 items-center gap-1 max-w-full">
+      <div className="text-black dark:text-white text-nowrap max-w-full truncate">
+        {props.label}
+      </div>
+      <div className="text-sm flex text-gray-500 dark:text-gray-400 items-center gap-1 max-w-full">
         <div>From: </div> {props.source} <props.icon />
       </div>
     </div>

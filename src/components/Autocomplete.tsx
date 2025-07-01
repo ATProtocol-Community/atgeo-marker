@@ -34,7 +34,7 @@ export function Autocomplete<T extends { label: string }>(props: {
         <Command>
           <PopoverAnchor asChild>
             <CommandInput
-              className="bg-none outline-0 focus-visible::outline-0 border-0 !bg-gray-600"
+              className="bg-none outline-0 focus-visible::outline-0 border-0 dark:!bg-gray-600 !bg-gray-100 dark:text-white text-black"
               asChild
               value={search}
               onValueChange={async (input) => {
@@ -66,7 +66,7 @@ export function Autocomplete<T extends { label: string }>(props: {
           </PopoverAnchor>
           {!open && <CommandList aria-hidden="true" className="hidden" />}
           <PopoverContent
-            className="w-full p-0 min-w-[500px]"
+            className="w-full p-0 min-w-[500px] bg-white dark:bg-gray-800 text-black dark:text-white border border-gray-200 dark:border-gray-700"
             asChild
             onOpenAutoFocus={(e) => e.preventDefault()}
             onInteractOutside={(e) => {
@@ -93,7 +93,7 @@ export function Autocomplete<T extends { label: string }>(props: {
                     <CommandGroup>
                       {options.map((option) => (
                         <CommandItem
-                          className="truncate w-full overflow-hidden max-w-full"
+                          className="truncate w-full overflow-hidden max-w-full text-black dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700"
                           key={option.label}
                           value={option.label}
                           onMouseDown={(e) => e.preventDefault()}
